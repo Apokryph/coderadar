@@ -1,16 +1,22 @@
 <template>
     <div class="project-settings">
-        <ProjectSettings headline="Project Settings"/>
+      <h1>Projects</h1>
+        <b-button to="/project-new" variant="success">new project</b-button>
+        <ProjectList/>
     </div>
 </template>
 
 <script>
-    import ProjectSettings from '@/components/ProjectSettings.vue'; // @ is an alias to /src
+    import ProjectList from '@/components/ProjectList.vue'; // @ is an alias to /src
 
     export default {
         name: 'projectSettingsView',
         components: {
-            ProjectSettings
+            ProjectList
         }
     }
 </script>
+
+<style scoped>
+
+</style>
