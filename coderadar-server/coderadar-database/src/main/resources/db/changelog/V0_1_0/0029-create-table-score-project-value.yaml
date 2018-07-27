@@ -1,0 +1,60 @@
+databaseChangeLog:
+  - changeSet:
+      id: 29
+      author: kobs
+      changes:
+        - createTable:
+            tableName: score_project_value
+            schemaName: public
+            columns:
+              - column:
+                  name: project_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: score_profile_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: score_value
+                  type: bigint
+                  constraints:
+                    nullable: false
+        - addPrimaryKey:
+            constraintName: pk_scprva_id
+            schemaName: public
+            tableName: score_project_value
+            columnNames: project_id, score_profile_id
+        - addUniqueConstraint:
+            constraintName: uk_scprva_id
+            schemaName: public
+            tableName: score_project_value
+            columnNames: project_id, score_profile_id
+        - addForeignKeyConstraint:
+            constraintName: fk_scprva_project_id
+            baseColumnNames: project_id
+            baseTableName: score_project_value
+            referencedColumnNames: id
+            referencedTableName: project
+        - createIndex:
+            indexName: idx_scprva_project_id
+            schemaName: public
+            tableName: score_project_value
+            columns:
+              - column:
+                  name: project_id
+        - addForeignKeyConstraint:
+            constraintName: fk_scprva_profile_id
+            baseColumnNames: score_profile_id
+            baseTableName: score_project_value
+            referencedColumnNames: id
+            referencedTableName: score_profile
+        - createIndex:
+            indexName: idx_scprva_profile_id
+            schemaName: public
+            tableName: score_project_value
+            columns:
+              - column:
+                  name: score_profile_id

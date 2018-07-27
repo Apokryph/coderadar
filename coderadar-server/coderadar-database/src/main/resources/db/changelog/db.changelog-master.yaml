@@ -52,3 +52,11 @@ databaseChangeLog:
       file: db/changelog/V0_1_0/0024-add-column-filehash-to-git-log-entry.yaml
   - include:
       file: db/changelog/V0_1_0/0025-add-column-vcs-online.yaml
+  - include:
+      file: db/changelog/V0_1_0/0026-create-table-score-profile.yaml
+  - include:
+      file: db/changelog/V0_1_0/0027-create-table-score-profile-metric.yaml
+  - include:
+      file: db/changelog/V0_1_0/0028-create-table-score-file-value.yaml
+  - include:
+      file: db/changelog/V0_1_0/0029-create-table-score-project-value.yaml

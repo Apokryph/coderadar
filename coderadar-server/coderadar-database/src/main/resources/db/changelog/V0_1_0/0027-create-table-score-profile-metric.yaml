@@ -1,0 +1,60 @@
+databaseChangeLog:
+  - changeSet:
+      id: 27
+      author: nkobs
+      changes:
+        - createTable:
+            tableName: score_profile_metric
+            schemaName: public
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: metric_type
+                  type: varchar(10)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: profile_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: score_weight
+                  type: bigint
+                  constraints:
+                    nullable: false
+        - addPrimaryKey:
+            constraintName: pk_spme_id
+            schemaName: public
+            tableName: score_profile_metric
+            columnNames: id
+        - addUniqueConstraint:
+            constraintName: uk_spme_id
+            schemaName: public
+            tableName: score_profile_metric
+            columnNames: id
+        - addForeignKeyConstraint:
+            constraintName: fk_spme_profile_id
+            baseColumnNames: profile_id
+            baseTableName: score_profile_metric
+            referencedColumnNames: id
+            referencedTableName: score_profile
+        - createIndex:
+            indexName: idx_spme_profile_id
+            schemaName: public
+            tableName: score_profile_metric
+            columns:
+              - column:
+                  name: profile_id
+        - createSequence:
+            schemaName: public
+            sequenceName: seq_spme_id

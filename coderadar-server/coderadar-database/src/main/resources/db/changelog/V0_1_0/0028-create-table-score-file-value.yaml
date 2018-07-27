@@ -1,0 +1,78 @@
+databaseChangeLog:
+  - changeSet:
+      id: 28
+      author: kobs
+      changes:
+        - createTable:
+            tableName: score_file_value
+            schemaName: public
+            columns:
+              - column:
+                  name: commit_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: file_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: score_profile_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: score_value
+                  type: bigint
+                  constraints:
+                    nullable: false
+        - addPrimaryKey:
+            constraintName: pk_scfiva_id
+            schemaName: public
+            tableName: score_file_value
+            columnNames: commit_id, file_id, score_profile_id
+        - addUniqueConstraint:
+            constraintName: uk_scfiva_id
+            schemaName: public
+            tableName: score_file_value
+            columnNames: commit_id, file_id, score_profile_id
+        - addForeignKeyConstraint:
+            constraintName: fk_scfiva_commit_id
+            baseColumnNames: commit_id
+            baseTableName: score_file_value
+            referencedColumnNames: id
+            referencedTableName: commit
+        - createIndex:
+            indexName: idx_scfiva_commit_id
+            schemaName: public
+            tableName: score_file_value
+            columns:
+              - column:
+                  name: commit_id
+        - addForeignKeyConstraint:
+            constraintName: fk_scfiva_file_id
+            baseColumnNames: file_id
+            baseTableName: score_file_value
+            referencedColumnNames: id
+            referencedTableName: file
+        - createIndex:
+            indexName: idx_scfiva_file_id
+            schemaName: public
+            tableName: score_file_value
+            columns:
+              - column:
+                  name: file_id
+        - addForeignKeyConstraint:
+            constraintName: fk_scfiva_profile_id
+            baseColumnNames: score_profile_id
+            baseTableName: score_file_value
+            referencedColumnNames: id
+            referencedTableName: score_profile
+        - createIndex:
+            indexName: idx_scfiva_profile_id
+            schemaName: public
+            tableName: score_file_value
+            columns:
+              - column:
+                  name: score_profile_id
