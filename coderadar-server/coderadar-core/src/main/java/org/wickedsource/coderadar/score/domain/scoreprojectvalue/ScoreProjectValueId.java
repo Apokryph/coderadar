@@ -2,6 +2,7 @@ package org.wickedsource.coderadar.score.domain.scoreprojectvalue;
 
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.wickedsource.coderadar.commit.domain.Commit;
 import org.wickedsource.coderadar.score.domain.scoreprofile.ScoreProfile;
 import org.wickedsource.coderadar.project.domain.Project;
 
@@ -12,19 +13,31 @@ import java.io.Serializable;
 public class ScoreProjectValueId implements Serializable {
 
   @OneToOne
-  @JoinColumn(name = "profile_id")
+  @JoinColumn(name = "score_profile_id")
   private ScoreProfile profile;
 
   @OneToOne
   @JoinColumn(name = "project_id")
   private Project project;
 
+  @OneToOne
+  @JoinColumn(name = "commit_id")
+  private Commit commit;
 
   public ScoreProjectValueId() {}
 
-  public ScoreProjectValueId(Project project, ScoreProfile profile) {
+  public ScoreProjectValueId(Project project, ScoreProfile profile, Commit commit) {
+    this.commit = commit;
     this.profile = profile;
     this.project = project;
+  }
+
+  public Commit getCommit() {
+    return commit;
+  }
+
+  public void setCommit(Commit commit) {
+    this.commit = commit;
   }
 
   public Project getProject() {

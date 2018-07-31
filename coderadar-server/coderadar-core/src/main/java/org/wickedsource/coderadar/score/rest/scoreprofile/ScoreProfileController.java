@@ -1,4 +1,4 @@
-package org.wickedsource.coderadar.score.rest;
+package org.wickedsource.coderadar.score.rest.scoreprofile;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -29,23 +29,23 @@ public class ScoreProfileController {
 
   private ProjectVerifier projectVerifier;
 
-  private ScoreProfileRepository qualityProfileRepository;
+  private ScoreProfileRepository scoreProfileRepository;
 
   @Autowired
   public ScoreProfileController(
-      ProjectVerifier projectVerifier, ScoreProfileRepository qualityProfileRepository) {
+      ProjectVerifier projectVerifier, ScoreProfileRepository scoreProfileRepository) {
     this.projectVerifier = projectVerifier;
-    this.qualityProfileRepository = qualityProfileRepository;
+    this.scoreProfileRepository = scoreProfileRepository;
   }
 
   @RequestMapping(method = RequestMethod.POST, produces = "application/hal+json")
-  public ResponseEntity<ScoreProfileResource> createQualityProfile(
-      @RequestBody @Valid ScoreProfileResource qualityProfileResource,
+  public ResponseEntity<ScoreProfileResource> createScoreProfile(
+      @RequestBody @Valid ScoreProfileResource scoreProfileResource,
       @PathVariable Long projectId) {
     Project project = projectVerifier.loadProjectOrThrowException(projectId);
     ScoreProfileResourceAssembler assembler = new ScoreProfileResourceAssembler(project);
-    ScoreProfile profile = assembler.updateEntity(qualityProfileResource, new ScoreProfile());
-    profile = qualityProfileRepository.save(profile);
+    ScoreProfile profile = assembler.updateEntity(scoreProfileResource, new ScoreProfile());
+    profile = scoreProfileRepository.save(profile);
     return new ResponseEntity<>(assembler.toResource(profile), HttpStatus.CREATED);
   }
 
@@ -54,18 +54,18 @@ public class ScoreProfileController {
     method = RequestMethod.POST,
     produces = "application/hal+json"
   )
-  public ResponseEntity<ScoreProfileResource> updateQualityProfile(
-      @Valid @RequestBody ScoreProfileResource qualityProfileResource,
+  public ResponseEntity<ScoreProfileResource> updateScoreProfile(
+      @Valid @RequestBody ScoreProfileResource scoreProfileResource,
       @PathVariable Long profileId,
       @PathVariable Long projectId) {
     Project project = projectVerifier.loadProjectOrThrowException(projectId);
     ScoreProfileResourceAssembler assembler = new ScoreProfileResourceAssembler(project);
-    ScoreProfile profile = qualityProfileRepository.findOne(profileId);
+    ScoreProfile profile = scoreProfileRepository.findOne(profileId);
     if (profile == null) {
       throw new ResourceNotFoundException();
     }
-    profile = assembler.updateEntity(qualityProfileResource, profile);
-    profile = qualityProfileRepository.save(profile);
+    profile = assembler.updateEntity(scoreProfileResource, profile);
+    profile = scoreProfileRepository.save(profile);
     return new ResponseEntity<>(assembler.toResource(profile), HttpStatus.OK);
   }
 
@@ -74,11 +74,11 @@ public class ScoreProfileController {
     method = RequestMethod.GET,
     produces = "application/hal+json"
   )
-  public ResponseEntity<ScoreProfileResource> getQualityProfile(
+  public ResponseEntity<ScoreProfileResource> getScoreProfile(
       @PathVariable Long profileId, @PathVariable Long projectId) {
     Project project = projectVerifier.loadProjectOrThrowException(projectId);
     ScoreProfileResourceAssembler assembler = new ScoreProfileResourceAssembler(project);
-    ScoreProfile profile = qualityProfileRepository.findOne(profileId);
+    ScoreProfile profile = scoreProfileRepository.findOne(profileId);
     if (profile == null) {
       throw new ResourceNotFoundException();
     }
@@ -90,22 +90,22 @@ public class ScoreProfileController {
     method = RequestMethod.DELETE,
     produces = "application/hal+json"
   )
-  public ResponseEntity<String> deleteQualityProfile(
+  public ResponseEntity<String> deleteScoreProfile(
       @PathVariable Long profileId, @PathVariable Long projectId) {
     projectVerifier.checkProjectExistsOrThrowException(projectId);
-    qualityProfileRepository.delete(profileId);
+    scoreProfileRepository.delete(profileId);
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
   @SuppressWarnings("unchecked")
   @RequestMapping(method = RequestMethod.GET, produces = "application/hal+json")
-  public ResponseEntity<PagedResources<ScoreProfileResource>> listQualityProfiles(
+  public ResponseEntity<PagedResources<ScoreProfileResource>> listScoreProfiles(
       @PageableDefault Pageable pageable,
       PagedResourcesAssembler pagedResourcesAssembler,
       @PathVariable long projectId) {
     Project project = projectVerifier.loadProjectOrThrowException(projectId);
     Page<ScoreProfile> profilesPage =
-        qualityProfileRepository.findByProjectId(projectId, pageable);
+        scoreProfileRepository.findByProjectId(projectId, pageable);
     ScoreProfileResourceAssembler assembler = new ScoreProfileResourceAssembler(project);
     PagedResources<ScoreProfileResource> pagedResources =
         pagedResourcesAssembler.toResource(profilesPage, assembler);

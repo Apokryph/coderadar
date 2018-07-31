@@ -1,4 +1,4 @@
-package org.wickedsource.coderadar.score.rest;
+package org.wickedsource.coderadar.score.rest.scoreprofile;
 
 import org.springframework.hateoas.ResourceSupport;
 import org.wickedsource.coderadar.score.domain.scoreprofile.ScoreMetricDTO;

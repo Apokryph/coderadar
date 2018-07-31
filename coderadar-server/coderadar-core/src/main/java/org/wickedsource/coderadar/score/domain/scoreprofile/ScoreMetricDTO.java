@@ -1,4 +1,4 @@
-package org.wickedsource.coderadar.score.domain;
+package org.wickedsource.coderadar.score.domain.scoreprofile;
 
 import javax.validation.constraints.*;
 

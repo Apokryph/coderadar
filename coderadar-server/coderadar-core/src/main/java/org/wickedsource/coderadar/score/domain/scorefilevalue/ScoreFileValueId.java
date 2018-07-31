@@ -21,7 +21,7 @@ public class ScoreFileValueId implements Serializable {
   private File file;
 
   @OneToOne
-  @JoinColumn(name = "profile_id")
+  @JoinColumn(name = "score_profile_id")
   private ScoreProfile profile;
 
   public ScoreFileValueId() {}

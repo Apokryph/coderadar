@@ -1,4 +1,4 @@
-package org.wickedsource.coderadar.score.domain;
+package org.wickedsource.coderadar.score.domain.scoreprofile;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

@@ -1,5 +1,6 @@
 package org.wickedsource.coderadar.score.domain.scoreprojectvalue;
 
+import org.wickedsource.coderadar.commit.domain.Commit;
 import org.wickedsource.coderadar.project.domain.Project;
 import org.wickedsource.coderadar.score.domain.scoreprofile.ScoreProfile;
 
@@ -22,11 +23,15 @@ public class ScoreProjectValue {
     this.value = value;
   }
 
+  public Commit getCommit() {
+    return id.getCommit();
+  }
+
   public Project getProject() {
     return id.getProject();
   }
 
-  public ScoreProfile getScoreProfile() { return id.getProfile(); }
+  public ScoreProfile getProfile() { return id.getProfile(); }
 
   public ScoreProjectValueId getId() {
     return id;

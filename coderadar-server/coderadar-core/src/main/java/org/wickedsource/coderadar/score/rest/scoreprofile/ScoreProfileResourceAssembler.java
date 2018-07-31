@@ -1,4 +1,4 @@
-package org.wickedsource.coderadar.score.rest;
+package org.wickedsource.coderadar.score.rest.scoreprofile;
 
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 import org.wickedsource.coderadar.project.domain.Project;
@@ -34,7 +34,7 @@ public class ScoreProfileResourceAssembler
     resource.add(
         linkTo(
                 methodOn(ScoreProfileController.class)
-                    .getQualityProfile(entity.getId(), project.getId()))
+                    .getScoreProfile(entity.getId(), project.getId()))
             .withRel("self"));
     resource.add(
         linkTo(methodOn(ProjectController.class).getProject(project.getId())).withRel("project"));

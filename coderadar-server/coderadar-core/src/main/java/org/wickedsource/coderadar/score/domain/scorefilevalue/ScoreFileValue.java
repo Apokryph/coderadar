@@ -9,7 +9,7 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "project_file_value")
+@Table(name = "score_file_value")
 public class ScoreFileValue {
 
   @EmbeddedId private ScoreFileValueId id;

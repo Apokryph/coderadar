@@ -23,7 +23,7 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: score_value
+                  name: value
                   type: bigint
                   constraints:
                     nullable: false

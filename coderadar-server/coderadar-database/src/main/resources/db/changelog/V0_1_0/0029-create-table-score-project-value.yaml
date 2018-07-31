@@ -18,7 +18,12 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: score_value
+                  name: commit_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: value
                   type: bigint
                   constraints:
                     nullable: false
@@ -26,12 +31,12 @@ databaseChangeLog:
             constraintName: pk_scprva_id
             schemaName: public
             tableName: score_project_value
-            columnNames: project_id, score_profile_id
+            columnNames: project_id, score_profile_id, commit_id
         - addUniqueConstraint:
             constraintName: uk_scprva_id
             schemaName: public
             tableName: score_project_value
-            columnNames: project_id, score_profile_id
+            columnNames: project_id, score_profile_id, commit_id
         - addForeignKeyConstraint:
             constraintName: fk_scprva_project_id
             baseColumnNames: project_id
@@ -58,3 +63,16 @@ databaseChangeLog:
             columns:
               - column:
                   name: score_profile_id
+        - addForeignKeyConstraint:
+            constraintName: fk_scprva_commit_id
+            baseColumnNames: commit_id
+            baseTableName: score_project_value
+            referencedColumnNames: id
+            referencedTableName: commit
+        - createIndex:
+            indexName: idx_scprva_commit_id
+            schemaName: public
+            tableName: score_project_value
+            columns:
+              - column:
+                  name: commit_id

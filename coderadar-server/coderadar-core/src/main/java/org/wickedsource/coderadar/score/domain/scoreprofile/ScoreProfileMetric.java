@@ -1,4 +1,4 @@
-package org.wickedsource.coderadar.score.domain;
+package org.wickedsource.coderadar.score.domain.scoreprofile;
 
 import javax.persistence.*;
 
@@ -6,7 +6,7 @@ import javax.persistence.*;
 @Table(name = "score_profile_metric")
 @SequenceGenerator(
   name = "score_profile_metric_sequence",
-  sequenceName = "seq_scme_id",
+  sequenceName = "seq_spme_id",
   allocationSize = 1
 )
 public class ScoreProfileMetric {
