@@ -29,6 +29,8 @@ public class ScoreProfileResourceAssembler
       metricDTO.setMetricName(metric.getName());
       metricDTO.setMetricType(metric.getMetricType());
       metricDTO.setMetricScoreWeight(metric.getScoreMetricWeight());
+      metricDTO.setScoreMetricMaxRange(metric.getScoreMetricMaxRange());
+      metricDTO.setScoreMetricMinRange(metric.getScoreMetricMinRange());
       resource.addMetric(metricDTO);
     }
     resource.add(
@@ -50,6 +52,8 @@ public class ScoreProfileResourceAssembler
       metric.setName(metricDTO.getMetricName());
       metric.setMetricType(metricDTO.getMetricType());
       metric.setScoreMetricWeight(metricDTO.getMetricScoreWeight());
+      metric.setScoreMetricMaxRange(metricDTO.getScoreMetricMaxRange());
+      metric.setScoreMetricMinRange(metricDTO.getScoreMetricMinRange());
       metric.setProfile(profile);
       profile.getMetrics().add(metric);
     }

@@ -1,0 +1,19 @@
+databaseChangeLog:
+  - changeSet:
+      id: 30
+      author: kobs
+      changes:
+        - addColumn:
+            columns:
+            - column:
+                name: min_range
+                type: bigint
+                constraints:
+                  nullable: false
+            - column:
+                name: max_range
+                type: bigint
+                constraints:
+                  nullable: false
+            schemaName: public
+            tableName: score_profile_metric

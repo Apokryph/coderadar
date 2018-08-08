@@ -11,12 +11,19 @@ public class ScoreMetricDTO {
   @Min(0)
   @Max(1)
   private float metricScoreWeight;
+
+  private long scoreMetricMinRange;
+
+  private long scoreMetricMaxRange;
+
   public ScoreMetricDTO() {}
 
-  public ScoreMetricDTO(String metricName, ScoreMetricType metricType,float metricScoreWeight) {
+  public ScoreMetricDTO(String metricName, ScoreMetricType metricType, float metricScoreWeight, long scoreMetricMinRange, long scoreMetricMaxRange) {
     this.metricName = metricName;
     this.metricType = metricType;
     this.metricScoreWeight = metricScoreWeight;
+    this.scoreMetricMinRange = scoreMetricMinRange;
+    this.scoreMetricMaxRange = scoreMetricMaxRange;
   }
 
   public String getMetricName() {
@@ -42,4 +49,12 @@ public class ScoreMetricDTO {
   public void setMetricScoreWeight(float metricScoreWeight) {
     this.metricScoreWeight = metricScoreWeight;
   }
+
+    public long getScoreMetricMinRange() { return scoreMetricMinRange; }
+
+    public void setScoreMetricMinRange(long scoreMetricMinRange) { this.scoreMetricMinRange = scoreMetricMinRange; }
+
+    public long getScoreMetricMaxRange() { return scoreMetricMaxRange; }
+
+    public void setScoreMetricMaxRange(long scoreMetricMaxRange) { this.scoreMetricMaxRange = scoreMetricMaxRange; }
 }
