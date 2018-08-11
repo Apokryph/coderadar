@@ -8,6 +8,8 @@ import java.util.List;
 
 public interface ScoreProfileRepository extends CrudRepository<ScoreProfile, Long> {
 
+  ScoreProfile findByName(String scoreProfileName);
+
   List<ScoreProfile> findByProjectId(Long projectId);
 
   Page<ScoreProfile> findByProjectId(Long projectId, Pageable pageable);

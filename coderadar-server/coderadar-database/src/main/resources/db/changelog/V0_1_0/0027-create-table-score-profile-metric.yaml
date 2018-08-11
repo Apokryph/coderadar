@@ -29,7 +29,7 @@ databaseChangeLog:
                     nullable: false
               - column:
                   name: score_weight
-                  type: real
+                  type: smallint
                   constraints:
                     nullable: false
         - addPrimaryKey:

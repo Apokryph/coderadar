@@ -14,11 +14,11 @@ public class ScoreProjectValue {
 
   @EmbeddedId private ScoreProjectValueId id;
 
-  private Long value;
+  private int value;
 
   public ScoreProjectValue() {}
 
-  public ScoreProjectValue(ScoreProjectValueId id, Long value) {
+  public ScoreProjectValue(ScoreProjectValueId id, int value) {
     this.id = id;
     this.value = value;
   }
@@ -41,11 +41,11 @@ public class ScoreProjectValue {
     this.id = id;
   }
 
-  public Long getValue() {
+  public int getValue() {
     return value;
   }
 
-  public void setValue(Long value) {
+  public void setValue(int value) {
     this.value = value;
   }
 }

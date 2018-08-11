@@ -46,6 +46,7 @@ import org.wickedsource.coderadar.project.domain.Project;
 import org.wickedsource.coderadar.score.domain.scorefilevalue.ScoreFileValue;
 import org.wickedsource.coderadar.score.domain.scorefilevalue.ScoreFileValueId;
 import org.wickedsource.coderadar.score.domain.scorefilevalue.ScoreFileValueRepository;
+import org.wickedsource.coderadar.score.domain.scoreprofile.ScoreMetricType;
 import org.wickedsource.coderadar.score.domain.scoreprofile.ScoreProfile;
 import org.wickedsource.coderadar.score.domain.scoreprofile.ScoreProfileMetric;
 import org.wickedsource.coderadar.score.domain.scoreprofile.ScoreProfileRepository;
@@ -246,47 +247,90 @@ public class CommitAnalyzer {
 
     }
 
+    private long clampValue(long value, long min, long max) {
+        if (value > max) {
+            return max;
+        }
+        if (value < min) {
+            return min;
+        }
+
+        return value;
+    }
+
     private void storeFileScoreValues(Commit commit, String filePath, FileMetrics metrics) {
 
         List<ScoreProfile> scoreProfiles = scoreProfileRepository.findByProjectId(commit.getProject().getId());
         File file = fileRepository.findInCommit(filePath, commit.getName(), commit.getProject().getId());
 
+        if (scoreProfiles == null || scoreProfiles.isEmpty()) {
+            throw new IllegalStateException(
+                    String.format(
+                            "could not find scoreProfiles in project %s",
+                            commit.getProject().getName()));
+        }
+
         for (ScoreProfile scoreProfile : scoreProfiles) {
             List<ScoreProfileMetric> scoreProfileMetrics = scoreProfile.getMetrics();
-            Long fileScore = 0l;
+            int fileScore = 0;
+            int weightCount = 0;
 
             for (ScoreProfileMetric scoreProfileMetric : scoreProfileMetrics) {
+
                 for (Metric metric : metrics.getMetrics()) {
                     MetricValueId id = new MetricValueId(commit, file, metric.getId());
                     MetricValue metricValue = new MetricValue(id, metrics.getMetricCount(metric));
 
                     if (metricValue.getMetricName().equals(scoreProfileMetric.getName())) {
-                        float metricScore = metricValue.getValue() * scoreProfileMetric.getScoreMetricWeight();
+                        float scorePoints;
+                        long minRange, maxRange;
+                        long value = metricValue.getValue();
 
                         switch (scoreProfileMetric.getMetricType()) {
                             case COMPLIANCE:
-                                fileScore = fileScore + (long)metricScore;
+
+                                minRange = scoreProfileMetric.getScoreFailValue();
+                                maxRange = scoreProfileMetric.getScoreOptimalValue();
+
+                                value = clampValue(value, minRange, maxRange);
+
+                                scorePoints = ((value - minRange) / (maxRange - minRange)) * scoreProfileMetric.getScoreMetricWeight();
+                                fileScore = fileScore + (int) scorePoints;
                                 break;
+
                             case VIOLATION:
-                                fileScore = fileScore - (long)metricScore;
+                                minRange = scoreProfileMetric.getScoreOptimalValue();
+                                maxRange = scoreProfileMetric.getScoreFailValue();
+
+                                value = clampValue(value, minRange, maxRange);
+
+                                scorePoints = ((maxRange - value) / (maxRange - minRange)) * scoreProfileMetric.getScoreMetricWeight();
+                                fileScore = fileScore + (int) scorePoints;
                                 break;
+
                             default:
                                 throw new IllegalStateException(
                                         String.format("unsupported ScoreMetricType: %s", scoreProfileMetric.getMetricType()));
                         }
-                    }
+
+                        weightCount = weightCount + scoreProfileMetric.getScoreMetricWeight();
+                    } //TODO: else metricValue = 0;
                 }
             }
 
-            ScoreFileValueId id = new ScoreFileValueId(commit, file, scoreProfile);
-            ScoreFileValue fileValue = new ScoreFileValue(id, fileScore);
-            scoreFileValueRepository.save(fileValue);
+            if (fileScore != 0) {
+                fileScore = fileScore / weightCount;
 
-            logger.info(
-                    "stored score for file {} in commit {} for profile {}",
-                    filePath,
-                    commit.getName(),
-                    scoreProfile.getName());
+                ScoreFileValueId id = new ScoreFileValueId(commit, file, scoreProfile);
+                ScoreFileValue fileValue = new ScoreFileValue(id, fileScore);
+                scoreFileValueRepository.save(fileValue);
+
+                logger.info(
+                        "stored score for file {} in commit {} for profile {}",
+                        filePath,
+                        commit.getName(),
+                        scoreProfile.getName());
+            }
         }
     }
 }

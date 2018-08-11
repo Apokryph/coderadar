@@ -14,11 +14,11 @@ public class ScoreFileValue {
 
   @EmbeddedId private ScoreFileValueId id;
 
-  private Long value;
+  private int value;
 
   public ScoreFileValue() {}
 
-  public ScoreFileValue(ScoreFileValueId id, Long value) {
+  public ScoreFileValue(ScoreFileValueId id, int value) {
     this.id = id;
     this.value = value;
   }
@@ -41,11 +41,11 @@ public class ScoreFileValue {
     this.id = id;
   }
 
-  public Long getValue() {
+  public int getValue() {
     return value;
   }
 
-  public void setValue(Long value) {
+  public void setValue(int value) {
     this.value = value;
   }
 }

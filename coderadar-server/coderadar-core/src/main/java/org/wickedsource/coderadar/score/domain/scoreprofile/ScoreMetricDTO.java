@@ -8,22 +8,22 @@ public class ScoreMetricDTO {
 
   private ScoreMetricType metricType;
 
-  @Min(0)
-  @Max(1)
-  private float metricScoreWeight;
+  @Min(1)
+  @Max(3)
+  private short metricScoreWeight;
 
-  private long scoreMetricMinRange;
+  private int metricScoreFailValue;
 
-  private long scoreMetricMaxRange;
+  private int metricScoreOptimalValue;
 
   public ScoreMetricDTO() {}
 
-  public ScoreMetricDTO(String metricName, ScoreMetricType metricType, float metricScoreWeight, long scoreMetricMinRange, long scoreMetricMaxRange) {
+  public ScoreMetricDTO(String metricName, ScoreMetricType metricType, short metricScoreWeight, int metricScoreFailValue, int metricScoreOptimalValue) {
     this.metricName = metricName;
     this.metricType = metricType;
     this.metricScoreWeight = metricScoreWeight;
-    this.scoreMetricMinRange = scoreMetricMinRange;
-    this.scoreMetricMaxRange = scoreMetricMaxRange;
+    this.metricScoreFailValue = metricScoreFailValue;
+    this.metricScoreOptimalValue = metricScoreOptimalValue;
   }
 
   public String getMetricName() {
@@ -42,19 +42,19 @@ public class ScoreMetricDTO {
     this.metricType = metricType;
   }
 
-  public float getMetricScoreWeight() {
+  public short getMetricScoreWeight() {
     return metricScoreWeight;
   }
 
-  public void setMetricScoreWeight(float metricScoreWeight) {
+  public void setMetricScoreWeight(short metricScoreWeight) {
     this.metricScoreWeight = metricScoreWeight;
   }
 
-    public long getScoreMetricMinRange() { return scoreMetricMinRange; }
+  public int getMetricScoreFailValue() { return metricScoreFailValue; }
 
-    public void setScoreMetricMinRange(long scoreMetricMinRange) { this.scoreMetricMinRange = scoreMetricMinRange; }
+  public void setMetricScoreFailValue(int metricScoreFailValue) { this.metricScoreFailValue = metricScoreFailValue; }
 
-    public long getScoreMetricMaxRange() { return scoreMetricMaxRange; }
+  public int getMetricScoreOptimalValue() { return metricScoreOptimalValue; }
 
-    public void setScoreMetricMaxRange(long scoreMetricMaxRange) { this.scoreMetricMaxRange = scoreMetricMaxRange; }
+  public void setMetricScoreOptimalValue(int metricScoreOptimalValue) { this.metricScoreOptimalValue = metricScoreOptimalValue; }
 }

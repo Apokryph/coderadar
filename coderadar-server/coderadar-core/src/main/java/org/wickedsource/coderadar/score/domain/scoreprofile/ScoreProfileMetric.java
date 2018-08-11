@@ -24,13 +24,13 @@ public class ScoreProfileMetric {
     private ScoreMetricType metricType;
 
     @Column(name = "score_weight")
-    private float scoreMetricWeight;
+    private short scoreMetricWeight;
 
-    @Column(name = "min_range")
-    private long scoreMetricMinRange;
+    @Column(name = "fail_value")
+    private int scoreFailValue;
 
-    @Column(name = "max_range")
-    private long scoreMetricMaxRange;
+    @Column(name = "optimal_value")
+    private int scoreOptimalValue;
 
     @ManyToOne
     @JoinColumn(name = "profile_id")
@@ -68,19 +68,21 @@ public class ScoreProfileMetric {
         this.profile = profile;
     }
 
-    public float getScoreMetricWeight() {
+    public short getScoreMetricWeight() {
         return scoreMetricWeight;
     }
 
-    public void setScoreMetricWeight(float scoreMetricWeight) {
+    public void setScoreMetricWeight(short scoreMetricWeight) {
         this.scoreMetricWeight = scoreMetricWeight;
     }
 
-    public long getScoreMetricMinRange() { return scoreMetricMinRange; }
+    public int getScoreFailValue() { return scoreFailValue; }
 
-    public void setScoreMetricMinRange(long scoreMetricMinRange) { this.scoreMetricMinRange = scoreMetricMinRange; }
+    public void setScoreFailValue(int scoreFailValue) { this.scoreFailValue = scoreFailValue; }
 
-    public long getScoreMetricMaxRange() { return scoreMetricMaxRange; }
+    public int getScoreOptimalValue() { return scoreOptimalValue; }
 
-    public void setScoreMetricMaxRange(long scoreMetricMaxRange) { this.scoreMetricMaxRange = scoreMetricMaxRange; }
+    public void setScoreOptimalValue(int scoreOptimalValue) { this.scoreOptimalValue = scoreOptimalValue; }
+
+
 }

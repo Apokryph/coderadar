@@ -60,3 +60,5 @@ databaseChangeLog:
       file: db/changelog/V0_1_0/0028-create-table-score-file-value.yaml
   - include:
       file: db/changelog/V0_1_0/0029-create-table-score-project-value.yaml
+  - include:
+      file: db/changelog/V0_1_0/0030-add-columns-fail-optimal-value-to-score-profile-metric.yaml

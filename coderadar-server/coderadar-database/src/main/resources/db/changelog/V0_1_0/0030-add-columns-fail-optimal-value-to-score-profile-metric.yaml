@@ -6,13 +6,13 @@ databaseChangeLog:
         - addColumn:
             columns:
             - column:
-                name: min_range
-                type: bigint
+                name: fail_value
+                type: int
                 constraints:
                   nullable: false
             - column:
-                name: max_range
-                type: bigint
+                name: optimal_value
+                type: int
                 constraints:
                   nullable: false
             schemaName: public
