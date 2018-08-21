@@ -272,7 +272,7 @@ public class CommitAnalyzer {
 
         for (ScoreProfile scoreProfile : scoreProfiles) {
             List<ScoreProfileMetric> scoreProfileMetrics = scoreProfile.getMetrics();
-            int fileScore = 0;
+            long fileScore = 0;
             int weightCount = 0;
 
             for (ScoreProfileMetric scoreProfileMetric : scoreProfileMetrics) {
@@ -295,7 +295,7 @@ public class CommitAnalyzer {
                                 value = clampValue(value, minRange, maxRange);
 
                                 scorePoints = ((value - minRange) / (maxRange - minRange)) * scoreProfileMetric.getScoreMetricWeight();
-                                fileScore = fileScore + (int) scorePoints;
+                                fileScore = fileScore + (long) scorePoints;
                                 break;
 
                             case VIOLATION:
@@ -305,7 +305,7 @@ public class CommitAnalyzer {
                                 value = clampValue(value, minRange, maxRange);
 
                                 scorePoints = ((maxRange - value) / (maxRange - minRange)) * scoreProfileMetric.getScoreMetricWeight();
-                                fileScore = fileScore + (int) scorePoints;
+                                fileScore = fileScore + (long) scorePoints;
                                 break;
 
                             default:

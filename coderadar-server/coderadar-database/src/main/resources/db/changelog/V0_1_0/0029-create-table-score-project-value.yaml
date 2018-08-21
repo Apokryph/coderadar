@@ -24,7 +24,7 @@ databaseChangeLog:
                     nullable: false
               - column:
                   name: value
-                  type: integer
+                  type: bigint
                   constraints:
                     nullable: false
         - addPrimaryKey:

@@ -62,6 +62,8 @@ public class CommitScoreController {
 
         List<String> scoreProfileNames = query.getProfiles();
 
+        List<ScoreValuePerCommitDTO> scoreValuesPerCommit = new ArrayList<>();
+
         for (String scoreProfileName : scoreProfileNames) {
 
             List<ScoreProfileMetric> scoreProfileMetrics = scoreProfileRepository.findByName(scoreProfileName).getMetrics();
@@ -71,17 +73,19 @@ public class CommitScoreController {
                 scoreProfileMetricNames.add(metric.getName());
             }
 
-            List<MetricValueDTO> profileMetricSccoreValues = metricValueRepository.findValuesAggregatedByCommitAndMetric(projectId, commit.getSequenceNumber(), scoreProfileMetricNames);
+            List<MetricValueDTO> profileMetricScoreValues = metricValueRepository.findValuesAggregatedByCommitAndMetric(projectId, commit.getSequenceNumber(), scoreProfileMetricNames);
 
+            scoreValuesPerCommit.add(new ScoreValuePerCommitDTO(scoreProfileName,getScoreValueFromMetrics(profileMetricScoreValues)));
         }
 
+        resource.addScoreValues(scoreValuesPerCommit);
 
         return new ResponseEntity<>(resource, HttpStatus.OK);
     }
 
-    private int getScoreValueFromMetrics(List<MetricValueDTO> metrics) {
-        int scoreValue = 0;
-        int weightCount = 0;
+    private Long getScoreValueFromMetrics(List<MetricValueDTO> metrics) {
+        long scoreValue = 0;
+        long weightCount = 0;
 
         for (MetricValueDTO metric : metrics) {
             ScoreProfileMetric scoreProfileMetric = scoreProfileMetricRepository.findByName(metric.getMetric());
@@ -93,7 +97,7 @@ public class CommitScoreController {
         return scoreValue / weightCount;
     }
 
-    private int calculateScoreMetricValue(ScoreProfileMetric metric, long value) {
+    private long calculateScoreMetricValue(ScoreProfileMetric metric, long value) {
         long minRange, maxRange;
         switch (metric.getMetricType()) {
             case COMPLIANCE:
@@ -103,7 +107,7 @@ public class CommitScoreController {
 
                 value = clampValue(value, minRange, maxRange);
 
-                return (int) (((value - minRange) / (maxRange - minRange)) * metric.getScoreMetricWeight());
+                return ((value - minRange) / (maxRange - minRange)) * metric.getScoreMetricWeight();
 
             case VIOLATION:
                 minRange = metric.getScoreOptimalValue();
@@ -111,7 +115,7 @@ public class CommitScoreController {
 
                 value = clampValue(value, minRange, maxRange);
 
-                return (int) (((maxRange - value) / (maxRange - minRange)) * metric.getScoreMetricWeight());
+                return ((maxRange - value) / (maxRange - minRange)) * metric.getScoreMetricWeight();
 
             default:
                 throw new IllegalStateException(
