@@ -13,4 +13,6 @@ public interface ScoreProfileRepository extends CrudRepository<ScoreProfile, Lon
   List<ScoreProfile> findByProjectId(Long projectId);
 
   Page<ScoreProfile> findByProjectId(Long projectId, Pageable pageable);
+
+  int deleteByProjectId(Long id);
 }

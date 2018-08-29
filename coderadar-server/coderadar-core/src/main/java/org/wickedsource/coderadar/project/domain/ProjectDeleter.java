@@ -18,6 +18,8 @@ import org.wickedsource.coderadar.job.core.JobRepository;
 import org.wickedsource.coderadar.metric.domain.finding.FindingRepository;
 import org.wickedsource.coderadar.metric.domain.metricvalue.MetricValueRepository;
 import org.wickedsource.coderadar.module.domain.ModuleRepository;
+import org.wickedsource.coderadar.score.domain.scorefilevalue.ScoreFileValueRepository;
+import org.wickedsource.coderadar.score.domain.scoreprofile.ScoreProfileRepository;
 
 @Component
 public class ProjectDeleter {
@@ -48,6 +50,10 @@ public class ProjectDeleter {
 
   private MetricValueRepository metricValueRepository;
 
+  private ScoreFileValueRepository scoreFileValueRepository;
+
+  private ScoreProfileRepository scoreProfileRepository;
+
   private FileIdentityRepository fileIdentityRepository;
 
   private ModuleRepository moduleRepository;
@@ -68,6 +74,8 @@ public class ProjectDeleter {
       GitLogEntryRepository gitLogEntryRepository,
       FindingRepository findingRepository,
       MetricValueRepository metricValueRepository,
+      ScoreFileValueRepository scoreFileValueRepository,
+      ScoreProfileRepository scoreProfileRepository,
       FileIdentityRepository fileIdentityRepository,
       ModuleRepository moduleRepository,
       ModuleAssociationRepository moduleAssociationRepository) {
@@ -83,6 +91,8 @@ public class ProjectDeleter {
     this.gitLogEntryRepository = gitLogEntryRepository;
     this.findingRepository = findingRepository;
     this.metricValueRepository = metricValueRepository;
+    this.scoreProfileRepository = scoreProfileRepository;
+    this.scoreFileValueRepository = scoreFileValueRepository;
     this.fileIdentityRepository = fileIdentityRepository;
     this.moduleRepository = moduleRepository;
     this.moduleAssociationRepository = moduleAssociationRepository;
@@ -99,6 +109,8 @@ public class ProjectDeleter {
     logger.debug("deleted {} AnalyzingJob entities", analyzingJobRepository.deleteByProjectId(id));
     logger.debug("deleted {} GitLogEntry entities", gitLogEntryRepository.deleteByProjectId(id));
     logger.debug("deleted {} MetricValue entities", metricValueRepository.deleteByProjectId(id));
+    logger.debug("deleted {} ScoreFileValue entities", scoreFileValueRepository.deleteByProjectId(id));
+    logger.debug("deleted {} ScoreProfile entities", scoreProfileRepository.deleteByProjectId(id));
     logger.debug("deleted {} Finding entities", findingRepository.deleteByProjectId(id));
     logger.debug(
         "deleted {} ModuleAssociation entities", moduleAssociationRepository.deleteByProjectId(id));
