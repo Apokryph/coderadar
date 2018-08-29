@@ -84,7 +84,7 @@ public class CommitScoreController {
     }
 
     private Long getScoreValueFromMetrics(List<MetricValueDTO> metrics) {
-        long scoreValue = 0;
+        float scoreValue = 0.0f;
         long weightCount = 0;
 
         for (MetricValueDTO metric : metrics) {
@@ -94,11 +94,12 @@ public class CommitScoreController {
             weightCount = weightCount + scoreProfileMetric.getScoreMetricWeight();
         }
 
-        return scoreValue / weightCount;
+        return (long)((scoreValue/weightCount)*100);
     }
 
-    private long calculateScoreMetricValue(ScoreProfileMetric metric, long value) {
+    private float calculateScoreMetricValue(ScoreProfileMetric metric, long value) {
         long minRange, maxRange;
+        float a,b,c,scorePoints;
         switch (metric.getMetricType()) {
             case COMPLIANCE:
 
@@ -107,7 +108,13 @@ public class CommitScoreController {
 
                 value = clampValue(value, minRange, maxRange);
 
-                return ((value - minRange) / (maxRange - minRange)) * metric.getScoreMetricWeight();
+                a = value - minRange;
+                b = maxRange - minRange;
+                c = a / b;
+
+                scorePoints = c * metric.getScoreMetricWeight();
+
+                return scorePoints;
 
             case VIOLATION:
                 minRange = metric.getScoreOptimalValue();
@@ -115,7 +122,13 @@ public class CommitScoreController {
 
                 value = clampValue(value, minRange, maxRange);
 
-                return ((maxRange - value) / (maxRange - minRange)) * metric.getScoreMetricWeight();
+                a = maxRange - value;
+                b = maxRange - minRange;
+                c = a / b;
+
+                scorePoints = c * metric.getScoreMetricWeight();
+
+                return scorePoints;
 
             default:
                 throw new IllegalStateException(

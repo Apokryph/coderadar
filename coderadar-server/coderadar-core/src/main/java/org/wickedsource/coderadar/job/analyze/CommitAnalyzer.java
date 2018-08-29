@@ -272,7 +272,7 @@ public class CommitAnalyzer {
 
         for (ScoreProfile scoreProfile : scoreProfiles) {
             List<ScoreProfileMetric> scoreProfileMetrics = scoreProfile.getMetrics();
-            long fileScore = 0;
+            float fileScore = 0.0f;
             int weightCount = 0;
 
             for (ScoreProfileMetric scoreProfileMetric : scoreProfileMetrics) {
@@ -282,7 +282,7 @@ public class CommitAnalyzer {
                     MetricValue metricValue = new MetricValue(id, metrics.getMetricCount(metric));
 
                     if (metricValue.getMetricName().equals(scoreProfileMetric.getName())) {
-                        float scorePoints;
+                        float scorePoints, a, b, c;
                         long minRange, maxRange;
                         long value = metricValue.getValue();
 
@@ -294,8 +294,13 @@ public class CommitAnalyzer {
 
                                 value = clampValue(value, minRange, maxRange);
 
-                                scorePoints = ((value - minRange) / (maxRange - minRange)) * scoreProfileMetric.getScoreMetricWeight();
-                                fileScore = fileScore + (long) scorePoints;
+                                a = value - minRange;
+                                b = maxRange - minRange;
+                                c = a / b;
+                                scorePoints = c * scoreProfileMetric.getScoreMetricWeight();
+
+                                //scorePoints = ((float)(value - minRange) / (float)(maxRange - minRange)) * scoreProfileMetric.getScoreMetricWeight();
+                                fileScore = fileScore + scorePoints;
                                 break;
 
                             case VIOLATION:
@@ -304,8 +309,12 @@ public class CommitAnalyzer {
 
                                 value = clampValue(value, minRange, maxRange);
 
-                                scorePoints = ((maxRange - value) / (maxRange - minRange)) * scoreProfileMetric.getScoreMetricWeight();
-                                fileScore = fileScore + (long) scorePoints;
+                                a = maxRange - value;
+                                b = maxRange - minRange;
+                                c = a / b;
+                                scorePoints = c * scoreProfileMetric.getScoreMetricWeight();
+                                //scorePoints = ((float)(maxRange - value) / (float)(maxRange - minRange)) * scoreProfileMetric.getScoreMetricWeight();
+                                fileScore = fileScore + scorePoints;
                                 break;
 
                             default:
@@ -314,23 +323,23 @@ public class CommitAnalyzer {
                         }
 
                         weightCount = weightCount + scoreProfileMetric.getScoreMetricWeight();
-                    } //TODO: else metricValue = 0;
+                    }
                 }
             }
 
-            if (fileScore != 0) {
-                fileScore = fileScore / weightCount;
-
-                ScoreFileValueId id = new ScoreFileValueId(commit, file, scoreProfile);
-                ScoreFileValue fileValue = new ScoreFileValue(id, fileScore);
-                scoreFileValueRepository.save(fileValue);
-
-                logger.info(
-                        "stored score for file {} in commit {} for profile {}",
-                        filePath,
-                        commit.getName(),
-                        scoreProfile.getName());
+            if (fileScore != 0.0f) {
+                fileScore = fileScore / weightCount * 100;
             }
+
+            ScoreFileValueId id = new ScoreFileValueId(commit, file, scoreProfile);
+            ScoreFileValue fileValue = new ScoreFileValue(id, (long) fileScore);
+            scoreFileValueRepository.save(fileValue);
+
+            logger.info(
+                    "stored score for file {} in commit {} for profile {}",
+                    id,
+                    commit.getId(),
+                    scoreProfile.getName());
         }
     }
 }
