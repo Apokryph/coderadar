@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.wickedsource.coderadar.commit.domain.Commit;
 import org.wickedsource.coderadar.commit.domain.CommitRepository;
 import org.wickedsource.coderadar.core.rest.validation.ResourceNotFoundException;
+import org.wickedsource.coderadar.metric.domain.metricvalue.MetricValue;
 import org.wickedsource.coderadar.metric.domain.metricvalue.MetricValueDTO;
 import org.wickedsource.coderadar.metric.domain.metricvalue.MetricValueRepository;
 import org.wickedsource.coderadar.project.rest.ProjectVerifier;
@@ -26,24 +27,17 @@ import java.util.List;
 @Controller
 @RequestMapping(path = "/projects/{projectId}/score/perCommit")
 public class CommitScoreController {
+
     private ProjectVerifier projectVerifier;
-
-    private MetricValueRepository metricValueRepository;
-
     private CommitRepository commitRepository;
 
-    private ScoreProfileRepository scoreProfileRepository;
-
-    private ScoreProfileMetricRepository scoreProfileMetricRepository;
-
+    private CommitScoreService commitScoreService;
 
     @Autowired
-    public CommitScoreController(ProjectVerifier projectVerifier, MetricValueRepository metricValueRepository, CommitRepository commitRepository, ScoreProfileRepository scoreProfileRepository, ScoreProfileMetricRepository scoreProfileMetricRepository) {
+    public CommitScoreController(ProjectVerifier projectVerifier, CommitRepository commitRepository, CommitScoreService commitScoreService) {
         this.projectVerifier = projectVerifier;
-        this.metricValueRepository = metricValueRepository;
         this.commitRepository = commitRepository;
-        this.scoreProfileRepository = scoreProfileRepository;
-        this.scoreProfileMetricRepository = scoreProfileMetricRepository;
+        this.commitScoreService = commitScoreService;
     }
 
     @RequestMapping(
@@ -62,88 +56,8 @@ public class CommitScoreController {
 
         List<String> scoreProfileNames = query.getProfiles();
 
-        List<ScoreValuePerCommitDTO> scoreValuesPerCommit = new ArrayList<>();
-
-        for (String scoreProfileName : scoreProfileNames) {
-
-            List<ScoreProfileMetric> scoreProfileMetrics = scoreProfileRepository.findByName(scoreProfileName).getMetrics();
-            List<String> scoreProfileMetricNames = new ArrayList<>();
-
-            for (ScoreProfileMetric metric : scoreProfileMetrics) {
-                scoreProfileMetricNames.add(metric.getName());
-            }
-
-            List<MetricValueDTO> profileMetricScoreValues = metricValueRepository.findValuesAggregatedByCommitAndMetric(projectId, commit.getSequenceNumber(), scoreProfileMetricNames);
-
-            scoreValuesPerCommit.add(new ScoreValuePerCommitDTO(scoreProfileName,getScoreValueFromMetrics(profileMetricScoreValues)));
-        }
-
-        resource.addScoreValues(scoreValuesPerCommit);
+        resource.addScoreValues(commitScoreService.getScoreValuesPerCommit(scoreProfileNames,projectId,commit.getSequenceNumber()));
 
         return new ResponseEntity<>(resource, HttpStatus.OK);
-    }
-
-    private Long getScoreValueFromMetrics(List<MetricValueDTO> metrics) {
-        float scoreValue = 0.0f;
-        long weightCount = 0;
-
-        for (MetricValueDTO metric : metrics) {
-            ScoreProfileMetric scoreProfileMetric = scoreProfileMetricRepository.findByName(metric.getMetric());
-
-            scoreValue = scoreValue + calculateScoreMetricValue(scoreProfileMetric, metric.getValue());
-            weightCount = weightCount + scoreProfileMetric.getScoreMetricWeight();
-        }
-
-        return (long)((scoreValue/weightCount)*100);
-    }
-
-    private float calculateScoreMetricValue(ScoreProfileMetric metric, long value) {
-        long minRange, maxRange;
-        float a,b,c,scorePoints;
-        switch (metric.getMetricType()) {
-            case COMPLIANCE:
-
-                minRange = metric.getScoreFailValue();
-                maxRange = metric.getScoreOptimalValue();
-
-                value = clampValue(value, minRange, maxRange);
-
-                a = value - minRange;
-                b = maxRange - minRange;
-                c = a / b;
-
-                scorePoints = c * metric.getScoreMetricWeight();
-
-                return scorePoints;
-
-            case VIOLATION:
-                minRange = metric.getScoreOptimalValue();
-                maxRange = metric.getScoreFailValue();
-
-                value = clampValue(value, minRange, maxRange);
-
-                a = maxRange - value;
-                b = maxRange - minRange;
-                c = a / b;
-
-                scorePoints = c * metric.getScoreMetricWeight();
-
-                return scorePoints;
-
-            default:
-                throw new IllegalStateException(
-                        String.format("unsupported ScoreMetricType: %s", metric.getMetricType()));
-        }
-    }
-
-    private long clampValue(long value, long min, long max) {
-        if (value > max) {
-            return max;
-        }
-        if (value < min) {
-            return min;
-        }
-
-        return value;
     }
 }

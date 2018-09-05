@@ -31,6 +31,21 @@ public interface MetricValueRepository extends CrudRepository<MetricValue, Long>
       @Param("metricNames") List<String> metricNames);
 
   /**
+   * Counts files per commit and metric name.
+   *
+   * @param projectId ID of the project whose metrics to find.
+   * @param commitSequenceNumber sequence number of the commit defining the point in time for which
+   *     to retrieve the metric values.
+   * @param metricNames names of the metrics whose values to find.
+   * @return list of aggregated metric values.
+   */
+  @Query(name = "MetricValue.countFilesPerCommitAndMetric")
+  List<Long> countFilesPerCommitAndMetric(
+      @Param("projectId") Long projectId,
+      @Param("commitSequenceNumber") Integer commitSequenceNumber,
+      @Param("metricNames") List<String> metricNames);
+
+  /**
    * Aggregates quality profile ratings per commit and quality profile name.
    *
    * @param projectId ID of the project whose metrics to find.

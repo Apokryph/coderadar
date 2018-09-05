@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.wickedsource.coderadar.core.rest.validation.ResourceNotFoundException;
 import org.wickedsource.coderadar.project.domain.Project;
 import org.wickedsource.coderadar.project.rest.ProjectVerifier;
+import org.wickedsource.coderadar.score.domain.scoreprofile.ScoreProfileMetricRepository;
 import org.wickedsource.coderadar.score.domain.scoreprofile.ScoreProfileRepository;
 import org.wickedsource.coderadar.score.domain.scoreprofile.ScoreProfile;
 
@@ -30,12 +31,14 @@ public class ScoreProfileController {
   private ProjectVerifier projectVerifier;
 
   private ScoreProfileRepository scoreProfileRepository;
+  private ScoreProfileMetricRepository scoreProfileMetricRepository;
 
   @Autowired
   public ScoreProfileController(
-      ProjectVerifier projectVerifier, ScoreProfileRepository scoreProfileRepository) {
+      ProjectVerifier projectVerifier, ScoreProfileRepository scoreProfileRepository, ScoreProfileMetricRepository scoreProfileMetricRepository) {
     this.projectVerifier = projectVerifier;
     this.scoreProfileRepository = scoreProfileRepository;
+    this.scoreProfileMetricRepository = scoreProfileMetricRepository;
   }
 
   @RequestMapping(method = RequestMethod.POST, produces = "application/hal+json")
@@ -94,6 +97,7 @@ public class ScoreProfileController {
       @PathVariable Long profileId, @PathVariable Long projectId) {
     projectVerifier.checkProjectExistsOrThrowException(projectId);
     scoreProfileRepository.delete(profileId);
+    scoreProfileMetricRepository.deleteByProfileId(profileId);
     return new ResponseEntity<>(HttpStatus.OK);
   }
 

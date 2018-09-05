@@ -28,7 +28,12 @@ import org.wickedsource.coderadar.CoderadarTestApplication;
     "coderadar.dateLocale=de_DE",
     // We want to use the same database instancein all tests, even when the default
     // is set to "true" with Spring Boot 1.5
-    "spring.datasource.generate-unique-name=false",
+
+    "spring.datasource.url=jdbc:postgresql://localhost:5432/coderadar",
+        "spring.datasource.username=postgres",
+        "spring.datasource.password=coderadar",
+        "spring.datasource.driver-class-name=org.postgresql.Driver",
+        "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect",
     "spring.jpa.hibernate.ddl-auto=validate",
     "spring.jpa.hibernate.use-new-id-generator-mappings=true"
   }

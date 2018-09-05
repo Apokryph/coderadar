@@ -65,6 +65,8 @@ public abstract class ControllerTestTemplate extends IntegrationTestTemplate {
         "seq_job_id",
         "seq_qpme_id",
         "seq_user_id",
+        "seq_scpr_id",
+        "seq_spme_id",
         "seq_reto_id");
   }
 
