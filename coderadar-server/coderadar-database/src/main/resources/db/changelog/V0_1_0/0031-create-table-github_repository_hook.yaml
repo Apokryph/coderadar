@@ -1,0 +1,45 @@
+databaseChangeLog:
+  - changeSet:
+      id: 31
+      author: nkobs
+      changes:
+        - createTable:
+            tableName: github_repository_hook
+            schemaName: public
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: commit_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+        - addPrimaryKey:
+            constraintName: pk_qrh_id
+            schemaName: public
+            tableName: github_repository_hook
+            columnNames: id
+        - addUniqueConstraint:
+            constraintName: uk_qrh_id
+            schemaName: public
+            tableName: github_repository_hook
+            columnNames: id
+        - addForeignKeyConstraint:
+            constraintName: fk_qrh_commit_id
+            baseColumnNames: commit_id
+            baseTableName: github_repository_hook
+            referencedColumnNames: id
+            referencedTableName: commit
+        - createIndex:
+            indexName: idx_qrh_commit_id
+            schemaName: public
+            tableName: github_repository_hook
+            columns:
+              - column:
+                  name: commit_id
+        - createSequence:
+            schemaName: public
+            sequenceName: seq_qrh_id
