@@ -13,10 +13,15 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: commit_id
-                  type: bigint
+                  name: commit_name
+                  type: varchar(40)
                   constraints:
-                    nullable: false
+                     nullable: false
+              - column:
+                  name: repository_full_name
+                  type: varchar(40)
+                  constraints:
+                     nullable: false
         - addPrimaryKey:
             constraintName: pk_qrh_id
             schemaName: public
@@ -27,19 +32,6 @@ databaseChangeLog:
             schemaName: public
             tableName: github_repository_hook
             columnNames: id
-        - addForeignKeyConstraint:
-            constraintName: fk_qrh_commit_id
-            baseColumnNames: commit_id
-            baseTableName: github_repository_hook
-            referencedColumnNames: id
-            referencedTableName: commit
-        - createIndex:
-            indexName: idx_qrh_commit_id
-            schemaName: public
-            tableName: github_repository_hook
-            columns:
-              - column:
-                  name: commit_id
         - createSequence:
             schemaName: public
             sequenceName: seq_qrh_id

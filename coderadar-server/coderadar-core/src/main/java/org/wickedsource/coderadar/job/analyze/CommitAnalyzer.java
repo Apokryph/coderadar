@@ -5,11 +5,13 @@ import static com.codahale.metrics.MetricRegistry.name;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.http.auth.AuthenticationException;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.gitective.core.BlobUtils;
@@ -37,6 +39,11 @@ import org.wickedsource.coderadar.filepattern.domain.FilePattern;
 import org.wickedsource.coderadar.filepattern.domain.FilePatternRepository;
 import org.wickedsource.coderadar.filepattern.domain.FileSetType;
 import org.wickedsource.coderadar.filepattern.match.FilePatternMatcher;
+import org.wickedsource.coderadar.github.domain.GitHubHook;
+import org.wickedsource.coderadar.github.domain.GitHubHookRepository;
+import org.wickedsource.coderadar.github.domain.GitHubRepositoryDTO;
+import org.wickedsource.coderadar.github.rest.GitHubCommentPort;
+import org.wickedsource.coderadar.github.rest.GitHubHookController;
 import org.wickedsource.coderadar.job.LocalGitRepositoryManager;
 import org.wickedsource.coderadar.metric.domain.finding.FindingRepository;
 import org.wickedsource.coderadar.metric.domain.metricvalue.MetricValue;
@@ -76,7 +83,7 @@ public class CommitAnalyzer {
 
     private ScoreFileValueRepository scoreFileValueRepository;
 
-    private ScoreProjectValueRepository scoreProjectValueRepository;
+    private GitHubHookRepository gitHubHookRepository;
 
     private MetricValueRepository metricValueRepository;
 
@@ -107,7 +114,7 @@ public class CommitAnalyzer {
             MetricValueRepository metricValueRepository,
             FindingRepository findingRepository,
             ScoreProfileRepository scoreProfileRepository,
-            ScoreProjectValueRepository scoreProjectValueRepository,
+            GitHubHookRepository gitHubHookRepository,
             ScoreFileValueRepository scoreFileValueRepository,
             MetricRegistry metricRegistry,
             GitLogEntryRepository gitLogEntryRepository,
@@ -123,7 +130,7 @@ public class CommitAnalyzer {
         this.metricValueRepository = metricValueRepository;
         this.findingRepository = findingRepository;
         this.scoreProfileRepository = scoreProfileRepository;
-        this.scoreProjectValueRepository = scoreProjectValueRepository;
+        this.gitHubHookRepository = gitHubHookRepository;
         this.scoreFileValueRepository = scoreFileValueRepository;
         this.commitsMeter = metricRegistry.meter(name(CommitAnalyzer.class, "commits"));
         this.filesMeter = metricRegistry.meter(name(CommitAnalyzer.class, "files"));
@@ -167,6 +174,27 @@ public class CommitAnalyzer {
             FileMetrics metrics = analyzeFile(gitClient, commit, filepath, analyzers);
             storeMetrics(commit, filepath, metrics);
             storeFileScoreValues(commit, filepath, metrics);
+
+            try {
+                GitHubHook foundHook = gitHubHookRepository.findGitHubHookByCommitHashName("cbc3daff9684e41de6667278dc3cf132aa7b2e08");
+                GitHubCommentPort commentPort = new GitHubCommentPort();
+                commentPort.postCommentOnGitHub("cbc3daff9684e41de6667278dc3cf132aa7b2e08", foundHook.getRepositoryFullName());
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (AuthenticationException e) {
+                e.printStackTrace();
+            }
+
+            /*if(isCommitInHookTable(commit)) {
+                GitHubHook foundHook = gitHubHookRepository.findGitHubHookByCommitHashName(commit.getName());
+                try {
+                    gitHubCommentPort.postCommentOnGitHub(commit, foundHook.getRepositoryFullName());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (AuthenticationException e) {
+                    e.printStackTrace();
+                }
+            }*/
             filesMeter.mark();
             analyzedFiles++;
         }
@@ -243,8 +271,14 @@ public class CommitAnalyzer {
         }
     }
 
-    private void storeProjectScoreValues() {
+    private boolean isCommitInHookTable(Commit commit) {
+        GitHubHook foundHook = gitHubHookRepository.findGitHubHookByCommitHashName(commit.getName());
 
+        if(foundHook != null) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     private long clampValue(long value, long min, long max) {

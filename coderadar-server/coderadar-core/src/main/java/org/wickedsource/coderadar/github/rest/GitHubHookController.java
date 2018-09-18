@@ -48,17 +48,15 @@ public class GitHubHookController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        // storing commit information to database
         ArrayList<GitHubCommitDTO> commits = gitHubHook.getCommits();
 
         for(int i = 0; i < commits.size(); i++) {
-            System.out.println("id: " + commits.get(i).getId());
-            GitHubHook hook = new GitHubHook(); //TODO: Initialize
+            System.out.println("id: " + commits.get(i).getId() + ", repo: " + gitHubHook.getRepository().getFull_name());
+            GitHubHook hook = new GitHubHook(commits.get(i).getId(), gitHubHook.getRepository().getFull_name());
             gitHubHookRepository.save(hook);
         }
-
-        // store commit information to database
-
-
         return new ResponseEntity<>("{ \"message\": \"Successfully received payload.\" }\n", HttpStatus.OK);
     }
 }

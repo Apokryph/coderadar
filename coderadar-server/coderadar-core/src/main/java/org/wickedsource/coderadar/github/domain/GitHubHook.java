@@ -17,9 +17,34 @@ public class GitHubHook {
     @Column(name = "id")
     private Long id;
 
-    @OneToOne
-    @JoinColumn(name = "commit_id")
-    private Commit commit;
+    @Column(name = "commit_name")
+    private String commitHashName;
+
+    @Column(name = "repository_full_name")
+    private String repositoryFullName;
+
+    public GitHubHook() {}
+
+    public GitHubHook(String commitHashName, String repositoryFullName) {
+        this.commitHashName = commitHashName;
+        this.repositoryFullName = repositoryFullName;
+    }
+
+    public String getRepositoryFullName() {
+        return repositoryFullName;
+    }
+
+    public void setRepositoryFullName(String repositoryFullName) {
+        this.repositoryFullName = repositoryFullName;
+    }
+
+    public String getCommitHashName() {
+        return commitHashName;
+    }
+
+    public void setCommitHashName(String commitHashName) {
+        this.commitHashName = commitHashName;
+    }
 
     public Long getId() {
         return id;
@@ -27,13 +52,5 @@ public class GitHubHook {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public Commit getCommit() {
-        return commit;
-    }
-
-    public void setCommit(Commit commit) {
-        this.commit = commit;
     }
 }
