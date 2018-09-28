@@ -66,6 +66,10 @@ public class DbUnitFactory {
         "/dbunit/qualityprofile/singleProjectWithQualityProfiles.xml";
   }
 
+  public static class ScoreProfiles {
+
+  }
+
   public static class Users {
 
     public static final String USERS = "/dbunit/user/userList.xml";

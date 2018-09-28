@@ -154,23 +154,22 @@ public class CommitAnalyzer {
             FileMetrics metrics = analyzeFile(gitClient, commit, filepath, analyzers);
             storeMetrics(commit, filepath, metrics);
 
-            // #START author: Kobs
-            //scoreFileService.storeFileScoreValues(commit, filepath, metrics);
-
-            if(commentPort.isCommitInHook(commit.getName())) {
-
-                try {
-                    commentPort.postCommentOnGitHub(commit);
-                    commentPort.deleteCommitEntry(commit.getName());
-
-                } catch (IOException | AuthenticationException e) {
-                    e.printStackTrace();
-                }
-            }
-            // #END author: Kobs
-
             filesMeter.mark();
             analyzedFiles++;
+        }
+
+        // author: Kobs
+        if(commentPort.isCommitInHook(commit.getName())) {
+            try {
+                commentPort.postCommentOnGitHub(commit);
+                commentPort.deleteCommitEntry(commit.getName());
+            } catch (IOException | AuthenticationException e) {
+                e.printStackTrace();
+
+                logger.warn(
+                        "Authentication problem with posting comment on github commit {}. Try to refresh your token.",
+                        commit.getName());
+            }
         }
 
         commitsMeter.mark();

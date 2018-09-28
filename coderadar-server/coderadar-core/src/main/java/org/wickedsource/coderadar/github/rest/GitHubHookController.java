@@ -2,6 +2,9 @@ package org.wickedsource.coderadar.github.rest;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -24,8 +27,11 @@ import java.util.ArrayList;
 @RequestMapping(path="/events/githubrepo")
 public class GitHubHookController {
 
+    private Logger logger = LoggerFactory.getLogger(GitHubHookController.class);
+
     private GitHubHookRepository gitHubHookRepository;
 
+    @Autowired
     public GitHubHookController(GitHubHookRepository gitHubHookRepository) {
         this.gitHubHookRepository = gitHubHookRepository;
     }
@@ -47,9 +53,14 @@ public class GitHubHookController {
         ArrayList<GitHubCommitDTO> commits = gitHubHook.getCommits();
 
         for (GitHubCommitDTO commit : commits) {
-            System.out.println("id: " + commit.getId() + ", repo: " + gitHubHook.getRepository().getFull_name());
+
             GitHubHook hook = new GitHubHook(commit.getId(), gitHubHook.getRepository().getFull_name());
             gitHubHookRepository.save(hook);
+
+            logger.info(
+                    "stored commit in github_repository_hook table id: {} full_name: {}",
+                    commit.getId(),
+                    gitHubHook.getRepository().getFull_name());
         }
         return new ResponseEntity<>("{ \"message\": \"Successfully received payload.\" }\n", HttpStatus.OK);
     }

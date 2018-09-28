@@ -8,6 +8,8 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -24,15 +26,17 @@ import java.util.List;
 @Component
 public class GitHubCommentPort {
 
+    private Logger logger = LoggerFactory.getLogger(GitHubCommentPort.class);
+
     private GitHubHookRepository gitHubHookRepository;
     private CommitScoreService commitScoreService;
     private ScoreProfileRepository scoreProfileRepository;
 
-    @Value("${github.token}")
-    private String token;
-
     @Value("${github.username}")
     private String username;
+
+    @Value("${github.githubtoken}")
+    private String token;
 
     @Autowired
     public GitHubCommentPort(GitHubHookRepository gitHubHookRepository, CommitScoreService commitScoreService, ScoreProfileRepository scoreProfileRepository) {
@@ -41,8 +45,15 @@ public class GitHubCommentPort {
         this.scoreProfileRepository = scoreProfileRepository;
     }
 
+    /**
+     *
+     * @param commit
+     * @throws IOException
+     * @throws AuthenticationException
+     */
     public void postCommentOnGitHub(Commit commit) throws IOException, AuthenticationException {
-        // initialize required information for sending commit comment
+
+        // required information for sending commit comment
         String fullRepositoryName = gitHubHookRepository.findGitHubHookByCommitHashName(commit.getName()).getRepositoryFullName();
         String url = "https://api.github.com/repos/" + fullRepositoryName + "/commits/" + commit.getName() + "/comments?";
 
@@ -86,10 +97,23 @@ public class GitHubCommentPort {
     }
 
     public boolean isCommitInHook(String commitName) {
-        return gitHubHookRepository.existsByCommitHashName(commitName);
+        if (gitHubHookRepository.existsByCommitHashName(commitName)) {
+            logger.info(
+                    "commit {} is in github_repository_hook table",
+                    commitName);
+            return true;
+        } else {
+            logger.info(
+                    "commit {} is not in github_repository_hook",
+                    commitName);
+            return false;
+        }
     }
 
     public void deleteCommitEntry(String commitName) {
         gitHubHookRepository.deleteGitHubHookByCommitHashName(commitName);
+        logger.info(
+                "deleted commit in github_repository_hook table id: {}",
+                commitName);
     }
 }

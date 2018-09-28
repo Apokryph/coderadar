@@ -32,6 +32,10 @@ public class CommitScoreService {
         // List of all metrics in profile
         List<ScoreProfileMetric> scoreProfileMetrics = scoreProfile.getMetrics();
 
+        if (scoreProfileMetrics == null) {
+            throw new IllegalArgumentException("'scoreProfiles' not found!");
+        }
+
         // List of all metricNames in profile
         List<String> scoreProfileMetricNames = new ArrayList<>();
 
@@ -48,14 +52,14 @@ public class CommitScoreService {
         // Divide the aggregated metric values by the number of files to get the average
         if (profileMetricValues.isEmpty()) {
             throw new NoMetricValuesFoundException();
-        } else {
-            for (int i = 0; i < profileMetricValues.size(); i++) {
-                long aggregatedValue = profileMetricValues.get(i).getValue();
-                long fileCount = fileCountsInCommit.get(i);
-                long result = aggregatedValue / fileCount;
+        }
 
-                profileMetricValues.set(i, new MetricValueDTO(profileMetricValues.get(i).getMetric(), result));
-            }
+        for (int i = 0; i < profileMetricValues.size(); i++) {
+            long aggregatedValue = profileMetricValues.get(i).getValue();
+            long fileCount = fileCountsInCommit.get(i);
+            long result = aggregatedValue / fileCount;
+
+            profileMetricValues.set(i, new MetricValueDTO(profileMetricValues.get(i).getMetric(), result));
         }
 
         // Use metric value average for every metric to calculate commitscore
