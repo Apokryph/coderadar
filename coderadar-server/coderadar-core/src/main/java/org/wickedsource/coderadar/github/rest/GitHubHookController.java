@@ -1,8 +1,6 @@
 package org.wickedsource.coderadar.github.rest;
 
-import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,10 +39,6 @@ public class GitHubHookController {
 
         try {
             gitHubHook = om.readValue(payload, GitHubHookDTO.class);
-        } catch (JsonMappingException e) {
-            e.printStackTrace();
-        } catch (JsonGenerationException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -52,9 +46,9 @@ public class GitHubHookController {
         // storing commit information to database
         ArrayList<GitHubCommitDTO> commits = gitHubHook.getCommits();
 
-        for(int i = 0; i < commits.size(); i++) {
-            System.out.println("id: " + commits.get(i).getId() + ", repo: " + gitHubHook.getRepository().getFull_name());
-            GitHubHook hook = new GitHubHook(commits.get(i).getId(), gitHubHook.getRepository().getFull_name());
+        for (GitHubCommitDTO commit : commits) {
+            System.out.println("id: " + commit.getId() + ", repo: " + gitHubHook.getRepository().getFull_name());
+            GitHubHook hook = new GitHubHook(commit.getId(), gitHubHook.getRepository().getFull_name());
             gitHubHookRepository.save(hook);
         }
         return new ResponseEntity<>("{ \"message\": \"Successfully received payload.\" }\n", HttpStatus.OK);

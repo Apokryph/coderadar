@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface ScoreProfileMetricRepository extends CrudRepository<ScoreProfileMetric, Long> {
 
-    ScoreProfileMetric findByName(String scoreProfileMetricName);
+    ScoreProfileMetric findByNameAndProfile(String scoreProfileMetricName, ScoreProfile profile);
 
     void deleteByProfileId(Long id);
 }

@@ -1,4 +1,4 @@
-package org.wickedsource.coderadar.metricquery.rest.commit.score;
+package org.wickedsource.coderadar.score.rest.commitscore;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Objects of this class provide parameters to query for score aggregated per
+ * Objects of this class provide parameters to query for commitscore aggregated per
  * commit.
  */
 public class CommitScoreQuery {

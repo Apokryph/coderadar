@@ -8,34 +8,88 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.wickedsource.coderadar.commit.domain.Commit;
+import org.wickedsource.coderadar.github.domain.GitHubHookRepository;
+import org.wickedsource.coderadar.score.rest.commitscore.CommitScoreService;
+import org.wickedsource.coderadar.score.domain.scoreprofile.ScoreProfile;
+import org.wickedsource.coderadar.score.domain.scoreprofile.ScoreProfileRepository;
 
 
 import java.io.IOException;
+import java.util.List;
 
 @Component
 public class GitHubCommentPort {
 
-    public GitHubCommentPort() {
+    private GitHubHookRepository gitHubHookRepository;
+    private CommitScoreService commitScoreService;
+    private ScoreProfileRepository scoreProfileRepository;
+
+    @Value("${github.token}")
+    private String token;
+
+    @Value("${github.username}")
+    private String username;
+
+    @Autowired
+    public GitHubCommentPort(GitHubHookRepository gitHubHookRepository, CommitScoreService commitScoreService, ScoreProfileRepository scoreProfileRepository) {
+        this.gitHubHookRepository = gitHubHookRepository;
+        this.commitScoreService = commitScoreService;
+        this.scoreProfileRepository = scoreProfileRepository;
     }
 
-    public void postCommentOnGitHub(String commitName, String fullRepositoryName) throws IOException, AuthenticationException {
-        String url = "https://api.github.com/repos/" + fullRepositoryName + "/commits/" + commitName + "/comments?";
+    public void postCommentOnGitHub(Commit commit) throws IOException, AuthenticationException {
+        // initialize required information for sending commit comment
+        String fullRepositoryName = gitHubHookRepository.findGitHubHookByCommitHashName(commit.getName()).getRepositoryFullName();
+        String url = "https://api.github.com/repos/" + fullRepositoryName + "/commits/" + commit.getName() + "/comments?";
+
+        // prepare comment content
+        StringBuilder commentContentBuilder = new StringBuilder();
+        List<ScoreProfile> scoreProfiles = scoreProfileRepository.findByProjectId(commit.getProject().getId());
+
+        if (scoreProfiles == null || scoreProfiles.isEmpty()) {
+            throw new IllegalStateException(
+                    String.format(
+                            "could not find scoreProfiles in project %s",
+                            commit.getProject().getName()));
+        }
+
+        // add commit commitscore for every profile to comment content
+        for (ScoreProfile scoreProfile : scoreProfiles) {
+
+            commentContentBuilder.append("Coderadar Commit Score:").append("/n");
+            commentContentBuilder.append(scoreProfile.getName()).append(": ");
+            commentContentBuilder.append(commitScoreService.getScoreValueFromCommitAndProfile(commit, scoreProfile)).append("/n");
+        }
+
+        // make http post with initialized content
         CloseableHttpClient client = HttpClients.createDefault();
         HttpPost httpPost = new HttpPost(url);
 
-        String json = "{ \"body\": \"Test Comment from GitHubCommentPort.\" }\n";
+        String commentContent = commentContentBuilder.toString();
+        String json = "{ \"body\": \"" + commentContent + "\" }\n";
         StringEntity entity = new StringEntity(json);
         httpPost.setEntity(entity);
         httpPost.setHeader("Content-type", "application/json");
-        httpPost.setHeader("User-Agent", "c0deradar");
+        httpPost.setHeader("User-Agent", username);
         UsernamePasswordCredentials creds
-                = new UsernamePasswordCredentials("c0deradar", "e04666f53416d91d88d30345dea7761bb18dd41d");
+                = new UsernamePasswordCredentials(username, token);
         httpPost.addHeader(new BasicScheme().authenticate(creds, httpPost, null));
 
         CloseableHttpResponse response = client.execute(httpPost);
         client.close();
+
         System.out.println(response);
+    }
+
+    public boolean isCommitInHook(String commitName) {
+        return gitHubHookRepository.existsByCommitHashName(commitName);
+    }
+
+    public void deleteCommitEntry(String commitName) {
+        gitHubHookRepository.deleteGitHubHookByCommitHashName(commitName);
     }
 }

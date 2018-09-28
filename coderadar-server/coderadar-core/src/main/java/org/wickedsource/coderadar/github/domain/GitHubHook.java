@@ -1,7 +1,5 @@
 package org.wickedsource.coderadar.github.domain;
 
-import org.wickedsource.coderadar.commit.domain.Commit;
-
 import javax.persistence.*;
 
 @Entity

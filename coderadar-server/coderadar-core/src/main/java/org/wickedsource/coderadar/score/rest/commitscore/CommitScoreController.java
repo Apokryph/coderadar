@@ -1,4 +1,4 @@
-package org.wickedsource.coderadar.metricquery.rest.commit.score;
+package org.wickedsource.coderadar.score.rest.commitscore;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -11,17 +11,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.wickedsource.coderadar.commit.domain.Commit;
 import org.wickedsource.coderadar.commit.domain.CommitRepository;
 import org.wickedsource.coderadar.core.rest.validation.ResourceNotFoundException;
-import org.wickedsource.coderadar.metric.domain.metricvalue.MetricValue;
-import org.wickedsource.coderadar.metric.domain.metricvalue.MetricValueDTO;
-import org.wickedsource.coderadar.metric.domain.metricvalue.MetricValueRepository;
 import org.wickedsource.coderadar.project.rest.ProjectVerifier;
-import org.wickedsource.coderadar.score.domain.scoreprofile.ScoreMetricType;
-import org.wickedsource.coderadar.score.domain.scoreprofile.ScoreProfileMetric;
-import org.wickedsource.coderadar.score.domain.scoreprofile.ScoreProfileMetricRepository;
-import org.wickedsource.coderadar.score.domain.scoreprofile.ScoreProfileRepository;
-
 import javax.validation.Valid;
-import java.util.ArrayList;
+
 import java.util.List;
 
 @Controller

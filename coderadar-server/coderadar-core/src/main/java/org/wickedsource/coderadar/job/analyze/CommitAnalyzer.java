@@ -39,25 +39,13 @@ import org.wickedsource.coderadar.filepattern.domain.FilePattern;
 import org.wickedsource.coderadar.filepattern.domain.FilePatternRepository;
 import org.wickedsource.coderadar.filepattern.domain.FileSetType;
 import org.wickedsource.coderadar.filepattern.match.FilePatternMatcher;
-import org.wickedsource.coderadar.github.domain.GitHubHook;
-import org.wickedsource.coderadar.github.domain.GitHubHookRepository;
-import org.wickedsource.coderadar.github.domain.GitHubRepositoryDTO;
 import org.wickedsource.coderadar.github.rest.GitHubCommentPort;
-import org.wickedsource.coderadar.github.rest.GitHubHookController;
 import org.wickedsource.coderadar.job.LocalGitRepositoryManager;
 import org.wickedsource.coderadar.metric.domain.finding.FindingRepository;
 import org.wickedsource.coderadar.metric.domain.metricvalue.MetricValue;
 import org.wickedsource.coderadar.metric.domain.metricvalue.MetricValueId;
 import org.wickedsource.coderadar.metric.domain.metricvalue.MetricValueRepository;
 import org.wickedsource.coderadar.project.domain.Project;
-import org.wickedsource.coderadar.score.domain.scorefilevalue.ScoreFileValue;
-import org.wickedsource.coderadar.score.domain.scorefilevalue.ScoreFileValueId;
-import org.wickedsource.coderadar.score.domain.scorefilevalue.ScoreFileValueRepository;
-import org.wickedsource.coderadar.score.domain.scoreprofile.ScoreMetricType;
-import org.wickedsource.coderadar.score.domain.scoreprofile.ScoreProfile;
-import org.wickedsource.coderadar.score.domain.scoreprofile.ScoreProfileMetric;
-import org.wickedsource.coderadar.score.domain.scoreprofile.ScoreProfileRepository;
-import org.wickedsource.coderadar.score.domain.scoreprojectvalue.ScoreProjectValueRepository;
 import org.wickedsource.coderadar.vcs.git.GitCommitFinder;
 
 @Service
@@ -79,12 +67,6 @@ public class CommitAnalyzer {
 
     private FileRepository fileRepository;
 
-    private ScoreProfileRepository scoreProfileRepository;
-
-    private ScoreFileValueRepository scoreFileValueRepository;
-
-    private GitHubHookRepository gitHubHookRepository;
-
     private MetricValueRepository metricValueRepository;
 
     private FindingRepository findingRepository;
@@ -92,6 +74,8 @@ public class CommitAnalyzer {
     private Meter commitsMeter;
 
     private Meter filesMeter;
+
+    private GitHubCommentPort commentPort;
 
     private GitLogEntryRepository gitLogEntryRepository;
 
@@ -113,10 +97,8 @@ public class CommitAnalyzer {
             FileRepository fileRepository,
             MetricValueRepository metricValueRepository,
             FindingRepository findingRepository,
-            ScoreProfileRepository scoreProfileRepository,
-            GitHubHookRepository gitHubHookRepository,
-            ScoreFileValueRepository scoreFileValueRepository,
             MetricRegistry metricRegistry,
+            GitHubCommentPort commentPort,
             GitLogEntryRepository gitLogEntryRepository,
             LocalGitRepositoryManager gitRepoManager,
             CommitRepository commitRepository) {
@@ -129,11 +111,9 @@ public class CommitAnalyzer {
         this.fileRepository = fileRepository;
         this.metricValueRepository = metricValueRepository;
         this.findingRepository = findingRepository;
-        this.scoreProfileRepository = scoreProfileRepository;
-        this.gitHubHookRepository = gitHubHookRepository;
-        this.scoreFileValueRepository = scoreFileValueRepository;
         this.commitsMeter = metricRegistry.meter(name(CommitAnalyzer.class, "commits"));
         this.filesMeter = metricRegistry.meter(name(CommitAnalyzer.class, "files"));
+        this.commentPort = commentPort;
         this.gitLogEntryRepository = gitLogEntryRepository;
         this.gitRepoManager = gitRepoManager;
         this.commitRepository = commitRepository;
@@ -173,28 +153,22 @@ public class CommitAnalyzer {
             logger.trace("analyzing file {} in commit {}", filepath, commit.getName());
             FileMetrics metrics = analyzeFile(gitClient, commit, filepath, analyzers);
             storeMetrics(commit, filepath, metrics);
-            storeFileScoreValues(commit, filepath, metrics);
 
-            try {
-                GitHubHook foundHook = gitHubHookRepository.findGitHubHookByCommitHashName("cbc3daff9684e41de6667278dc3cf132aa7b2e08");
-                GitHubCommentPort commentPort = new GitHubCommentPort();
-                commentPort.postCommentOnGitHub("cbc3daff9684e41de6667278dc3cf132aa7b2e08", foundHook.getRepositoryFullName());
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (AuthenticationException e) {
-                e.printStackTrace();
-            }
+            // #START author: Kobs
+            //scoreFileService.storeFileScoreValues(commit, filepath, metrics);
 
-            /*if(isCommitInHookTable(commit)) {
-                GitHubHook foundHook = gitHubHookRepository.findGitHubHookByCommitHashName(commit.getName());
+            if(commentPort.isCommitInHook(commit.getName())) {
+
                 try {
-                    gitHubCommentPort.postCommentOnGitHub(commit, foundHook.getRepositoryFullName());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (AuthenticationException e) {
+                    commentPort.postCommentOnGitHub(commit);
+                    commentPort.deleteCommitEntry(commit.getName());
+
+                } catch (IOException | AuthenticationException e) {
                     e.printStackTrace();
                 }
-            }*/
+            }
+            // #END author: Kobs
+
             filesMeter.mark();
             analyzedFiles++;
         }
@@ -268,112 +242,6 @@ public class CommitAnalyzer {
                 entity.setLineEnd(finding.getLineEnd());
                 findingRepository.save(entity);
             }
-        }
-    }
-
-    private boolean isCommitInHookTable(Commit commit) {
-        GitHubHook foundHook = gitHubHookRepository.findGitHubHookByCommitHashName(commit.getName());
-
-        if(foundHook != null) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    private long clampValue(long value, long min, long max) {
-        if (value > max) {
-            return max;
-        }
-        if (value < min) {
-            return min;
-        }
-
-        return value;
-    }
-
-    private void storeFileScoreValues(Commit commit, String filePath, FileMetrics metrics) {
-
-        List<ScoreProfile> scoreProfiles = scoreProfileRepository.findByProjectId(commit.getProject().getId());
-        File file = fileRepository.findInCommit(filePath, commit.getName(), commit.getProject().getId());
-
-        if (scoreProfiles == null || scoreProfiles.isEmpty()) {
-            throw new IllegalStateException(
-                    String.format(
-                            "could not find scoreProfiles in project %s",
-                            commit.getProject().getName()));
-        }
-
-        for (ScoreProfile scoreProfile : scoreProfiles) {
-            List<ScoreProfileMetric> scoreProfileMetrics = scoreProfile.getMetrics();
-            float fileScore = 0.0f;
-            int weightCount = 0;
-
-            for (ScoreProfileMetric scoreProfileMetric : scoreProfileMetrics) {
-
-                for (Metric metric : metrics.getMetrics()) {
-                    MetricValueId id = new MetricValueId(commit, file, metric.getId());
-                    MetricValue metricValue = new MetricValue(id, metrics.getMetricCount(metric));
-
-                    if (metricValue.getMetricName().equals(scoreProfileMetric.getName())) {
-                        float scorePoints, a, b, c;
-                        long minRange, maxRange;
-                        long value = metricValue.getValue();
-
-                        switch (scoreProfileMetric.getMetricType()) {
-                            case COMPLIANCE:
-
-                                minRange = scoreProfileMetric.getScoreFailValue();
-                                maxRange = scoreProfileMetric.getScoreOptimalValue();
-
-                                value = clampValue(value, minRange, maxRange);
-
-                                a = value - minRange;
-                                b = maxRange - minRange;
-                                c = a / b;
-                                scorePoints = c * scoreProfileMetric.getScoreMetricWeight();
-
-                                //scorePoints = ((float)(value - minRange) / (float)(maxRange - minRange)) * scoreProfileMetric.getScoreMetricWeight();
-                                fileScore = fileScore + scorePoints;
-                                break;
-
-                            case VIOLATION:
-                                minRange = scoreProfileMetric.getScoreOptimalValue();
-                                maxRange = scoreProfileMetric.getScoreFailValue();
-
-                                value = clampValue(value, minRange, maxRange);
-
-                                a = maxRange - value;
-                                b = maxRange - minRange;
-                                c = a / b;
-                                scorePoints = c * scoreProfileMetric.getScoreMetricWeight();
-                                //scorePoints = ((float)(maxRange - value) / (float)(maxRange - minRange)) * scoreProfileMetric.getScoreMetricWeight();
-                                fileScore = fileScore + scorePoints;
-                                break;
-
-                            default:
-                                throw new IllegalStateException(
-                                        String.format("unsupported ScoreMetricType: %s", scoreProfileMetric.getMetricType()));
-                        }
-
-                        weightCount = weightCount + scoreProfileMetric.getScoreMetricWeight();
-                    }
-                }
-            }
-
-            if (fileScore != 0.0f) {
-                fileScore = fileScore / weightCount * 100;
-            }
-
-            ScoreFileValueId id = new ScoreFileValueId(commit, file, scoreProfile);
-            ScoreFileValue fileValue = new ScoreFileValue(id, (long) fileScore);
-            scoreFileValueRepository.save(fileValue);
-
-            logger.info(
-                    "stored score for file {} in commit {} for profile {}",
-                    id,
-                    commit.getId(),
-                    scoreProfile.getName());
         }
     }
 }

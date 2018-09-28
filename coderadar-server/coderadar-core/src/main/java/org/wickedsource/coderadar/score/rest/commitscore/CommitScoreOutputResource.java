@@ -1,4 +1,4 @@
-package org.wickedsource.coderadar.metricquery.rest.commit.score;
+package org.wickedsource.coderadar.score.rest.commitscore;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.hateoas.ResourceSupport;
