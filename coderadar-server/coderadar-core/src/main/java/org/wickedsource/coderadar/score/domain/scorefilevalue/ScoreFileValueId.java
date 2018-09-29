@@ -9,6 +9,9 @@ import org.wickedsource.coderadar.score.domain.scoreprofile.ScoreProfile;
 import javax.persistence.*;
 import java.io.Serializable;
 
+/**
+ * @author Kobs
+ */
 @Embeddable
 public class ScoreFileValueId implements Serializable {
 

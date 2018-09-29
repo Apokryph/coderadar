@@ -2,6 +2,9 @@ package org.wickedsource.coderadar.github.domain;
 
 import java.util.ArrayList;
 
+/**
+ * @author Kobs
+ */
 public class GitHubHookDTO {
 
     private ArrayList<GitHubCommitDTO> commits;

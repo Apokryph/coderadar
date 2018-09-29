@@ -15,6 +15,13 @@ import org.wickedsource.coderadar.score.domain.scoreprofile.ScoreProfileMetricRe
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Class for calculating score value per commit.
+ * Use getScoreValueFromCommitAndProfile and give parameters of the
+ * Commit and a ScoreProfile you want to get a score from.
+ *
+ * @author Kobs
+ */
 @Service
 public class CommitScoreService {
 
@@ -27,6 +34,15 @@ public class CommitScoreService {
         this.metricValueRepository = metricValueRepository;
     }
 
+    /**
+     * Method for calculating a score from metric values in a special commit.
+     * You also need to provide a ScoreProfile to give information about your score metric configuration.
+     * In the end it takes a failValue, optimalValue and MetricType to know how you want your score to be calculated.
+     *
+     * @param commit the commit you want to get a score from
+     * @param scoreProfile the score profile you want to get your score from
+     * @return the calculated score for this commit and profile
+     */
     public Long getScoreValueFromCommitAndProfile(Commit commit, ScoreProfile scoreProfile) {
 
         // List of all metrics in profile
@@ -66,6 +82,14 @@ public class CommitScoreService {
         return getScoreValueFromMetricValues(scoreProfile, profileMetricValues);
     }
 
+    /**
+     * Help method to calculate score.
+     * Before you use this you have to devide aggregated metricvalues by the number of files in the current commit.
+     *
+     * @param scoreProfile the score profile you want to have your score from
+     * @param metricValues the average values counted by metrics
+     * @return
+     */
     private Long getScoreValueFromMetricValues(ScoreProfile scoreProfile, List<MetricValueDTO> metricValues) {
 
         float scoreSum = 0.0f; // Sum of all calculated commitscore values
@@ -84,6 +108,23 @@ public class CommitScoreService {
         return (long) ((scoreSum / weightSum) * 100);
     }
 
+
+    /**
+     * This is a help method is calculating the Percent Relative Range
+     * from maximum and minimum range of a score metric according to metric types.
+     * <ul>
+     *     <li>
+     *         VIOLATION: ((maxRange - value) / (maxRange - minRange)) * scoreProfileMetric.getScoreMetricWeight()
+     *     </li>
+     *     <li>
+     *         COMPLIANCE: ((value - minRange) / (maxRange - minRange)) * scoreProfileMetric.getScoreMetricWeight()
+     *     </li>
+     * </ul>
+     *
+     * @param metric the score profile metric with maxRange, minRange and metricType
+     * @param value the counted value for the metric
+     * @return
+     */
     private float calculateScoreMetricValue(ScoreProfileMetric metric, long value) {
         long minRange, maxRange; // minimum and maximum of allowed commitscore range
         float numerator, divisor, range, scorePoints; // help variables to calculate the final commitscore value
@@ -125,6 +166,13 @@ public class CommitScoreService {
         }
     }
 
+    /**
+     * Helps to provent a value to be less than minimum or more than maximum value
+     * @param value the value you want to put into range
+     * @param min minimum
+     * @param max maximum
+     * @return returns the value in the right range
+     */
     private long clampValue(long value, long min, long max) {
         if (value > max) {
             return max;

@@ -5,6 +5,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
+/**
+ * @author Kobs
+ */
 public interface ScoreFileValueRepository extends CrudRepository<ScoreFileValue, Long> {
 
     @Query(

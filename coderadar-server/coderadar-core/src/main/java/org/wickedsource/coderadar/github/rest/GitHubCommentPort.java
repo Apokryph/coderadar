@@ -21,8 +21,17 @@ import org.wickedsource.coderadar.score.domain.scoreprofile.ScoreProfileReposito
 
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 
+
+/**
+ * Class to send a GitHub Comment with calculated scores for all score profiles on a specific Commit.
+ * You can find required information about Coderadar GitHub user in local.application.properties.
+ * Sometimes you get Authentication error while sending post. Therefore you have to refresh the "github.token".
+ *
+ * @author Kobs
+ */
 @Component
 public class GitHubCommentPort {
 
@@ -35,7 +44,7 @@ public class GitHubCommentPort {
     @Value("${github.username}")
     private String username;
 
-    @Value("${github.githubtoken}")
+    @Value("${github.token}")
     private String token;
 
     @Autowired
@@ -46,12 +55,13 @@ public class GitHubCommentPort {
     }
 
     /**
+     * Method to send post request to GitHub under provided commit.
      *
-     * @param commit
-     * @throws IOException
-     * @throws AuthenticationException
+     * @see <a href="https://developer.github.com/v3/repos/comments/#get-a-single-commit-comment</a>
+     * @param commit The commit you want Coderadar to send a GitHub comment to.
+     * @throws AuthenticationException If you get this error try to refresh your token in local.application.properties
      */
-    public void postCommentOnGitHub(Commit commit) throws IOException, AuthenticationException {
+    public void postCommentOnGitHub(Commit commit) {
 
         // required information for sending commit comment
         String fullRepositoryName = gitHubHookRepository.findGitHubHookByCommitHashName(commit.getName()).getRepositoryFullName();
@@ -71,9 +81,8 @@ public class GitHubCommentPort {
         // add commit commitscore for every profile to comment content
         for (ScoreProfile scoreProfile : scoreProfiles) {
 
-            commentContentBuilder.append("Coderadar Commit Score:").append("/n");
             commentContentBuilder.append(scoreProfile.getName()).append(": ");
-            commentContentBuilder.append(commitScoreService.getScoreValueFromCommitAndProfile(commit, scoreProfile)).append("/n");
+            commentContentBuilder.append(commitScoreService.getScoreValueFromCommitAndProfile(commit, scoreProfile)).append(", ");
         }
 
         // make http post with initialized content
@@ -82,20 +91,55 @@ public class GitHubCommentPort {
 
         String commentContent = commentContentBuilder.toString();
         String json = "{ \"body\": \"" + commentContent + "\" }\n";
-        StringEntity entity = new StringEntity(json);
+        StringEntity entity = null;
+
+        try {
+            entity = new StringEntity(json);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
         httpPost.setEntity(entity);
         httpPost.setHeader("Content-type", "application/json");
         httpPost.setHeader("User-Agent", username);
         UsernamePasswordCredentials creds
                 = new UsernamePasswordCredentials(username, token);
-        httpPost.addHeader(new BasicScheme().authenticate(creds, httpPost, null));
 
-        CloseableHttpResponse response = client.execute(httpPost);
-        client.close();
+        // try to authenticate with github username and token
+        try {
+            httpPost.addHeader(new BasicScheme().authenticate(creds, httpPost, null));
+        } catch (AuthenticationException e) {
+            e.printStackTrace();
+            logger.error(
+                    "Authentication problem. Please refresh your github token.");
+        }
 
-        System.out.println(response);
+        //try to send http post
+        CloseableHttpResponse response = null;
+        try {
+            response = client.execute(httpPost);
+            client.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+            logger.error(
+                    "Posting comment on github didn't work.");
+        }
+
+        // delete entry so coderadar is not posting again
+        deleteCommitEntry(commit.getName());
+
+        logger.info(
+                "Sent post request to github on commit {}. Got following response: {}",
+                commit.getName(),
+                response);
     }
 
+    /**
+     * Method to check if there is an entry stored for this commit in github_repository_hook table.
+     *
+     * @param commitName name of the commit you want to check for
+     * @return true, if commit entry with the same name is stored
+     */
     public boolean isCommitInHook(String commitName) {
         if (gitHubHookRepository.existsByCommitHashName(commitName)) {
             logger.info(
@@ -110,7 +154,11 @@ public class GitHubCommentPort {
         }
     }
 
-    public void deleteCommitEntry(String commitName) {
+    /**
+     * Method to delete an entry with the commit name from github_repository_hook.
+     * @param commitName name of the commit you want to delete
+     */
+    private void deleteCommitEntry(String commitName) {
         gitHubHookRepository.deleteGitHubHookByCommitHashName(commitName);
         logger.info(
                 "deleted commit in github_repository_hook table id: {}",

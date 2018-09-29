@@ -8,6 +8,9 @@ import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
+/**
+ * @author Kobs
+ */
 @Entity
 @Table(name = "score_file_value")
 public class ScoreFileValue {

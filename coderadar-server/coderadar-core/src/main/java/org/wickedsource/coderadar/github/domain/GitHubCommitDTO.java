@@ -1,5 +1,8 @@
 package org.wickedsource.coderadar.github.domain;
 
+/**
+ * @author Kobs
+ */
 public class GitHubCommitDTO {
     String id;
 

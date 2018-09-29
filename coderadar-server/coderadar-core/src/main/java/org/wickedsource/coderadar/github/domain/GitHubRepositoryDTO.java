@@ -1,7 +1,10 @@
 package org.wickedsource.coderadar.github.domain;
 
+/**
+ * @author Kobs
+ */
 public class GitHubRepositoryDTO {
-    String full_name;
+    private String full_name;
 
     public String getFull_name() {
         return full_name;

@@ -8,6 +8,9 @@ import javax.validation.constraints.Size;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @Kobs
+ */
 public class ScoreProfileResource extends ResourceSupport {
 
   @NotNull private String profileName;

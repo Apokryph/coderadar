@@ -2,6 +2,9 @@ package org.wickedsource.coderadar.score.domain.scoreprofile;
 
 import javax.validation.constraints.*;
 
+/**
+ * @author Kobs
+ */
 public class ScoreMetricDTO {
 
   private String metricName;

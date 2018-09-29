@@ -2,6 +2,9 @@ package org.wickedsource.coderadar.score.domain.scoreprofile;
 
 import javax.persistence.*;
 
+/**
+ * @author Kobs
+ */
 @Entity
 @Table(name = "score_profile_metric")
 @SequenceGenerator(

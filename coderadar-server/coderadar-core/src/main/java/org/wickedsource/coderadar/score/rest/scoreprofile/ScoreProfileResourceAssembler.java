@@ -10,6 +10,10 @@ import org.wickedsource.coderadar.score.domain.scoreprofile.ScoreProfileMetric;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
+
+/**
+ * @Kobs
+ */
 public class ScoreProfileResourceAssembler
     extends ResourceAssemblerSupport<ScoreProfile, ScoreProfileResource> {
 

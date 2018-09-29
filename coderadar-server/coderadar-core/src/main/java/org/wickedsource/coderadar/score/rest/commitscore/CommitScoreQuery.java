@@ -8,7 +8,7 @@ import java.util.List;
 
 /**
  * Objects of this class provide parameters to query for commitscore aggregated per
- * commit.
+ * commit. You need to provide commit name and score profile name.
  */
 public class CommitScoreQuery {
 

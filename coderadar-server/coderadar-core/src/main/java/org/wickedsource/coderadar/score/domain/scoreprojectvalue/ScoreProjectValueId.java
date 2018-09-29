@@ -9,6 +9,9 @@ import org.wickedsource.coderadar.project.domain.Project;
 import javax.persistence.*;
 import java.io.Serializable;
 
+/**
+ * @author Kobs
+ */
 @Embeddable
 public class ScoreProjectValueId implements Serializable {
 

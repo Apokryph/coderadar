@@ -11,7 +11,12 @@ import org.wickedsource.coderadar.score.domain.scoreprofile.ScoreProfileMetric;
 
 import java.util.List;
 
+/**
+ * @author Kobs
+ */
 public class ScoreFileService {
+
+    //TODO: Write ScoreFileService to store file scores using CommitScoreService
 
     /*private long clampValue(long value, long min, long max) {
         if (value > max) {

@@ -6,6 +6,9 @@ import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
 
+/**
+ * @author Kobs
+ */
 public interface ScoreProfileRepository extends CrudRepository<ScoreProfile, Long> {
 
   ScoreProfile findByName(String scoreProfileName);

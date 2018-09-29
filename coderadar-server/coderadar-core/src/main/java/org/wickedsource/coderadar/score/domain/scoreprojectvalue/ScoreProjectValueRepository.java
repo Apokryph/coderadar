@@ -6,6 +6,9 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.wickedsource.coderadar.metric.domain.metricvalue.*;
 
+/**
+ * @author Kobs
+ */
 public interface ScoreProjectValueRepository extends CrudRepository<MetricValue, Long> {
 
   @Query(

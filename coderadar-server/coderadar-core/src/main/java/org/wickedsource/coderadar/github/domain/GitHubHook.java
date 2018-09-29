@@ -2,6 +2,9 @@ package org.wickedsource.coderadar.github.domain;
 
 import javax.persistence.*;
 
+/**
+ * @author Kobs
+ */
 @Entity
 @Table(name = "github_repository_hook")
 @SequenceGenerator(

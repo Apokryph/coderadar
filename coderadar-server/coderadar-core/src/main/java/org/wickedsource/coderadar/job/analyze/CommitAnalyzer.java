@@ -5,13 +5,11 @@ import static com.codahale.metrics.MetricRegistry.name;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.http.auth.AuthenticationException;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.gitective.core.BlobUtils;
@@ -160,16 +158,7 @@ public class CommitAnalyzer {
 
         // author: Kobs
         if(commentPort.isCommitInHook(commit.getName())) {
-            try {
                 commentPort.postCommentOnGitHub(commit);
-                commentPort.deleteCommitEntry(commit.getName());
-            } catch (IOException | AuthenticationException e) {
-                e.printStackTrace();
-
-                logger.warn(
-                        "Authentication problem with posting comment on github commit {}. Try to refresh your token.",
-                        commit.getName());
-            }
         }
 
         commitsMeter.mark();

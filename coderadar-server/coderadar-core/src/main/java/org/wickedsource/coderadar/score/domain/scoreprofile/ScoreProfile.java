@@ -6,6 +6,9 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @author Kobs
+ */
 @Entity
 @Table(name = "score_profile")
 @SequenceGenerator(

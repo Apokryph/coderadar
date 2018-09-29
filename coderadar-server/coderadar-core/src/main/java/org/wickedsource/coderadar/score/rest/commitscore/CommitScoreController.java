@@ -18,6 +18,12 @@ import org.wickedsource.coderadar.score.domain.scoreprofile.ScoreProfileReposito
 
 import javax.validation.Valid;
 
+/**
+ * Controller for getting score per commit.
+ * You need to provide commit name and score profile name into post body.
+ *
+ * @author Kobs
+ */
 @Controller
 @RequestMapping(path = "/projects/{projectId}/score/perCommit")
 public class CommitScoreController {

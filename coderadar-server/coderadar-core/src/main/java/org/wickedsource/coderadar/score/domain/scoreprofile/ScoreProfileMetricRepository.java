@@ -4,6 +4,9 @@ import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
 
+/**
+ * @author Kobs
+ */
 public interface ScoreProfileMetricRepository extends CrudRepository<ScoreProfileMetric, Long> {
 
     ScoreProfileMetric findByNameAndProfile(String scoreProfileMetricName, ScoreProfile profile);

@@ -22,9 +22,17 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 
+/**
+ * Controller for handling post requests triggered by webhooks from GitHub.
+ * At the moment push-events are covered to store information
+ * about the commit and repository into github_repository_hook table.
+ * In the end GitHubCommentPort will send a post to comment on GitHub.
+ *
+ * @author Kobs
+ */
 @Controller
 @Transactional
-@RequestMapping(path="/events/githubrepo")
+@RequestMapping(path = "/events/githubrepo")
 public class GitHubHookController {
 
     private Logger logger = LoggerFactory.getLogger(GitHubHookController.class);
@@ -36,6 +44,15 @@ public class GitHubHookController {
         this.gitHubHookRepository = gitHubHookRepository;
     }
 
+    /**
+     * Method gets post request that are triggered by webhooks from github.
+     * At first you have to register a webhook at your github repository manually to: ../events/githubrepo.
+     * It will unmarshall the json payload with jacksons ObjectMapper
+     * to save id and full_name to
+     *
+     * @param payload provides information about push event from github
+     * @return response entity with status message
+     */
     @RequestMapping(method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
     public ResponseEntity<String> storeCommitsFromHook(@RequestBody String payload) {
 

@@ -2,6 +2,9 @@ package org.wickedsource.coderadar.score.rest.commitscore;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+/**
+ * @Kobs
+ */
 public class ScoreValuePerCommitDTO {
 
     @JsonIgnore public String profile;

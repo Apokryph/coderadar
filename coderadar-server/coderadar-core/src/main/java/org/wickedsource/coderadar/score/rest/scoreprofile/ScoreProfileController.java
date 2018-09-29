@@ -23,6 +23,14 @@ import org.wickedsource.coderadar.score.domain.scoreprofile.ScoreProfile;
 
 import javax.validation.Valid;
 
+/**
+ * Controller for managing score profiles.
+ * Used to calculate score with.
+ * For more information about calculating:
+ * @see org.wickedsource.coderadar.score.rest.commitscore.CommitScoreService#
+ *
+ * @Kobs
+ */
 @Controller
 @Transactional
 @RequestMapping(path = "/projects/{projectId}/scoreprofiles")
